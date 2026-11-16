@@ -223,6 +223,30 @@ const PRICING_TIERS = [
   { title: 'Good to know', lines: ['General turnaround: 2–3 weeks', 'Commercial use add-on available on the Custom form', 'Payment via the checkout flow — demo store, no real charge'] },
 ];
 
+/* ---------- Temporary AI art assignment (swappable per ASSET-MAP) ----------
+   Pools of generated transparent art in assets/img/items/, cycled per group.
+   Replace any file 1:1 with your own art, or set an item's img to override. */
+const ITEM_ART = 'assets/img/items/';
+const _pool = (prefix, n) => Array.from({ length: n }, (_, i) => ITEM_ART + prefix + '-' + String(i + 1).padStart(2, '0') + '.svg');
+const ART_POOLS = {
+  emote: [..._pool('emote-a', 16), ..._pool('emote-b', 16)],
+  gacha: _pool('gacha', 20),
+  shop: _pool('shop', 16),
+  streamkit: _pool('streamkit', 16),
+  vtuberFull: [..._pool('vtuber-full-a', 6), ..._pool('vtuber-full-b', 6)],
+  vtuberChibi: _pool('vtuber-chibi', 9),
+  vtuberAdopt: _pool('vtuber-adopt', 6),
+};
+COMMISSION_ITEMS.forEach((it, i) => { it.img = ART_POOLS.emote[i % ART_POOLS.emote.length]; });
+SHOP_ITEMS.forEach((it, i) => { it.img = ART_POOLS.shop[i % ART_POOLS.shop.length]; });
+STREAMKIT_ITEMS.forEach((it, i) => { it.img = ART_POOLS.streamkit[i % ART_POOLS.streamkit.length]; });
+GACHA_REWARDS.forEach((it, i) => { it.img = ART_POOLS.gacha[i % ART_POOLS.gacha.length]; });
+VTUBER_ITEMS.forEach((it, i) => {
+  const pool = String(it.tab).includes('chibi') ? ART_POOLS.vtuberChibi
+    : String(it.tab).includes('adopt') ? ART_POOLS.vtuberAdopt : ART_POOLS.vtuberFull;
+  it.img = pool[i % pool.length];
+});
+
 window.DATA = {
   ASSETS,
   COMMISSION_CATEGORIES, COMMISSION_ITEMS, REVIEWS, PRICING_TIERS,
