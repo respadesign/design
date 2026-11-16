@@ -438,7 +438,7 @@ function renderVtubers() {
     <div class="vt-grid">
       ${items.map(i => `<div class="vt-card">
         ${i.soldOut ? '<span class="sold-out">SOLD OUT</span>' : ''}
-        <div class="arch" style="${thumbStyle(i)}">${i.img ? artInner(i, '') : `<img class="arch-img" src="${esc(A.vtuberPlaceholder)}" alt="VTuber placeholder art">`}</div>
+        <div class="arch" style="${thumbStyle(i)}">${i.img ? `<img class="arch-img contain" src="${esc(i.img)}" alt="${esc(i.name)}">` : `<img class="arch-img" src="${esc(A.vtuberPlaceholder)}" alt="VTuber placeholder art">`}</div>
         <h3>${esc(i.name)}</h3><div class="price">${i.priceLabel}</div>
         <button class="btn btn-yellow" style="margin-top:10px;padding:8px 18px;font-size:14px" data-vt-detail="${i.id}" ${i.soldOut ? 'disabled' : ''}>${i.soldOut ? 'SOLD OUT' : 'SHOW DETAIL'}</button>
       </div>`).join('')}
@@ -447,7 +447,7 @@ function renderVtubers() {
   $$('[data-vt-detail]').forEach(b => b.onclick = () => {
     if (!requireLogin('Log in to view model details ♡')) return;
     const i = D.VTUBER_ITEMS.find(x => x.id === b.dataset.vtDetail);
-    openModal(`<div class="modal-art" style="${thumbStyle(i)}">${i.img ? artInner(i, '') : `<img class="arch-img contain" src="${esc(A.vtuberPlaceholder)}" alt="VTuber placeholder art">`}</div>
+    openModal(`<div class="modal-art" style="${thumbStyle(i)}">${i.img ? `<img class="arch-img contain" src="${esc(i.img)}" alt="${esc(i.name)}">` : `<img class="arch-img contain" src="${esc(A.vtuberPlaceholder)}" alt="VTuber placeholder art">`}</div>
       <h2>${esc(i.name)}</h2>
       <p style="font-weight:800;margin:6px 0"><span class="price" style="font-size:24px">${i.priceLabel}</span></p>
       <p style="font-weight:700;color:var(--ink2);line-height:1.65">A hand-drawn ${i.tab === 'chibi' ? 'chibi' : 'full'} VTuber model in RESPA's signature cute style. Placeholder description — final copy and real artwork will replace this.</p>
