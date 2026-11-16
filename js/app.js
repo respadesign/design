@@ -141,7 +141,7 @@ function initSplash() {
 /* ============================================================
    HOME — Town of RESPA (pannable map)
    ============================================================ */
-let town = { x: -120, y: -60, scale: 1, selected: null };
+let town = { x: -140, y: -170, scale: 1, selected: null };
 const BUILDINGS = [
   { id: 'emote',    emoji: '🏠', name: 'EMOTE',       label: '✿ Emote commissions this way!', x: 300,  y: 600, route: '#/commission' },
   { id: 'streamkit',emoji: '🏬', name: 'STREAM KIT',  label: '📺 Full stream packages!',      x: 1140, y: 500, route: '#/stream-kit' },
