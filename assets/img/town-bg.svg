@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 1000" preserveAspectRatio="none">
+  <!-- Original town background placeholder: grass, river+bank left, beach+sea top-right, park, paths, fountain.
+       Decorative details (trees/flowers/NPCs) are layered in code on top. -->
+  <rect width="1700" height="1000" fill="#8ed081"/>
+  <rect width="1700" height="1000" fill="#83cc72" opacity="0.45"/>
+  <!-- river -->
+  <rect x="0" y="0" width="230" height="1000" fill="#7cc6ec"/>
+  <rect x="0" y="0" width="230" height="1000" fill="#a5dcf5" opacity="0.5"/>
+  <rect x="222" y="0" width="10" height="1000" fill="#e8d28a"/>
+  <!-- beach + sea -->
+  <path d="M1270 0 L1700 0 L1700 250 Q1470 300 1360 190 Q1290 120 1270 0Z" fill="#f7e3a1"/>
+  <path d="M1270 0 L1700 0 L1700 120 Q1500 170 1400 100 Q1300 60 1270 0Z" fill="#57b6e6"/>
+  <!-- paths -->
+  <rect x="200" y="452" width="1330" height="44" rx="20" fill="#f2dfae"/>
+  <rect x="760" y="120" width="44" height="760" rx="20" fill="#f2dfae"/>
+  <!-- park -->
+  <rect x="600" y="120" width="370" height="280" rx="36" fill="#a5dd8f" stroke="#6db35c" stroke-width="5" stroke-dasharray="14 10"/>
+  <!-- fountain -->
+  <circle cx="782" cy="248" r="46" fill="#bfe8f7" stroke="#57b6e6" stroke-width="6"/>
+  <circle cx="782" cy="248" r="18" fill="#e8f9ff" stroke="#57b6e6" stroke-width="5"/>
+</svg>

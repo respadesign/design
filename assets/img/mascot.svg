@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440">
+  <!-- Original generic chibi mascot placeholder (NOT based on any existing mascot). -->
+  <ellipse cx="200" cy="408" rx="105" ry="16" fill="#000" opacity="0.12"/>
+  <!-- body / dress -->
+  <path d="M200 268 L268 398 Q200 420 132 398 Z" fill="#ffd21f" stroke="#141414" stroke-width="7" stroke-linejoin="round"/>
+  <rect x="182" y="246" width="36" height="30" rx="10" fill="#fff" stroke="#141414" stroke-width="6"/>
+  <!-- arms -->
+  <path d="M148 300 Q104 322 96 282" fill="none" stroke="#141414" stroke-width="16" stroke-linecap="round"/>
+  <path d="M252 300 Q300 286 306 244" fill="none" stroke="#141414" stroke-width="16" stroke-linecap="round"/>
+  <!-- head -->
+  <circle cx="200" cy="168" r="104" fill="#ffe3cf" stroke="#141414" stroke-width="7"/>
+  <!-- hair -->
+  <path d="M96 168 Q84 52 200 48 Q316 52 304 168 Q292 104 248 96 Q268 140 250 148 Q236 96 200 92 Q164 96 150 148 Q132 140 152 96 Q108 104 96 168Z" fill="#ff8fbF" stroke="#141414" stroke-width="7" stroke-linejoin="round"/>
+  <!-- bow -->
+  <g stroke="#141414" stroke-width="6" stroke-linejoin="round">
+    <path d="M282 62 L330 38 L334 88 Z" fill="#ffd21f"/>
+    <path d="M282 62 L240 34 L232 84 Z" fill="#ffd21f"/>
+    <circle cx="282" cy="62" r="13" fill="#ff6fa5"/>
+  </g>
+  <!-- face -->
+  <circle cx="162" cy="178" r="11" fill="#141414"/><circle cx="238" cy="178" r="11" fill="#141414"/>
+  <circle cx="166" cy="174" r="4" fill="#fff"/><circle cx="242" cy="174" r="4" fill="#fff"/>
+  <path d="M186 208 Q200 220 214 208" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="132" cy="204" rx="16" ry="9" fill="#ffb3cd"/><ellipse cx="268" cy="204" rx="16" ry="9" fill="#ffb3cd"/>
+  <!-- shoes -->
+  <ellipse cx="164" cy="404" rx="24" ry="11" fill="#141414"/><ellipse cx="236" cy="404" rx="24" ry="11" fill="#141414"/>
+</svg>

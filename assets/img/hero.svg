@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <!-- Original OG / hero placeholder image (1200x630). -->
+  <rect width="1200" height="630" fill="#ffd21f"/>
+  <circle cx="1050" cy="90" r="130" fill="#ff6fa5" opacity="0.55"/>
+  <circle cx="90" cy="540" r="110" fill="#8fd8ff" opacity="0.6"/>
+  <circle cx="180" cy="120" r="44" fill="#fff" opacity="0.55"/>
+  <rect x="110" y="150" width="700" height="180" rx="36" fill="#141414"/>
+  <text x="460" y="238" text-anchor="middle" font-family="'Baloo 2',Verdana,sans-serif" font-weight="800" font-size="92" fill="#ffd21f">RESPA</text>
+  <text x="460" y="300" text-anchor="middle" font-family="'Baloo 2',Verdana,sans-serif" font-weight="700" font-size="34" letter-spacing="16" fill="#fff">STUDIO</text>
+  <text x="110" y="420" font-family="Verdana,sans-serif" font-weight="700" font-size="36" fill="#141414">Kawaii emotes · stream kits · VTubers</text>
+  <text x="110" y="472" font-family="Verdana,sans-serif" font-size="27" fill="#5b4356">Commissions, shop &amp; a gacha mini-game — respadesign</text>
+  <!-- mini generic chibi -->
+  <g transform="translate(905,330)">
+    <circle cx="0" cy="0" r="105" fill="#ffe3cf" stroke="#141414" stroke-width="8"/>
+    <path d="M-105 0 Q-112 -118 0 -120 Q112 -118 105 0 Q92 -62 48 -70 Q64 -28 46 -20 Q34 -70 0 -72 Q-34 -70 -46 -20 Q-64 -28 -48 -70 Q-92 -62 -105 0Z" fill="#ff8fbF" stroke="#141414" stroke-width="8" stroke-linejoin="round"/>
+    <circle cx="-38" cy="12" r="11" fill="#141414"/><circle cx="38" cy="12" r="11" fill="#141414"/>
+    <path d="M-14 44 Q0 56 14 44" fill="none" stroke="#141414" stroke-width="7" stroke-linecap="round"/>
+    <ellipse cx="-66" cy="40" rx="16" ry="9" fill="#ffb3cd"/><ellipse cx="66" cy="40" rx="16" ry="9" fill="#ffb3cd"/>
+  </g>
+</svg>

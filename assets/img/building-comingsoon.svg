@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <!-- Original placeholder: fenced construction site. Slot: Town > COMING SOON (non-navigating). -->
+  <ellipse cx="120" cy="216" rx="88" ry="12" fill="#000" opacity="0.15"/>
+  <!-- half-built frame -->
+  <rect x="66" y="96" width="10" height="112" fill="#8a6d84"/><rect x="164" y="96" width="10" height="112" fill="#8a6d84"/>
+  <rect x="60" y="88" width="120" height="10" fill="#8a6d84"/>
+  <line x1="76" y1="98" x2="164" y2="150" stroke="#8a6d84" stroke-width="7"/>
+  <!-- crane hook -->
+  <line x1="182" y1="40" x2="182" y2="86" stroke="#141414" stroke-width="5"/>
+  <rect x="160" y="86" width="44" height="30" rx="5" fill="#c9ced6" stroke="#141414" stroke-width="5"/>
+  <rect x="30" y="30" width="152" height="12" rx="6" fill="#ffb03a" stroke="#141414" stroke-width="5"/>
+  <rect x="172" y="30" width="10" height="66" fill="#ffb03a" stroke="#141414" stroke-width="4"/>
+  <!-- striped barrier fence -->
+  <g stroke="#141414" stroke-width="5">
+    <rect x="34" y="168" width="172" height="26" fill="#fff"/>
+    <path d="M52 168 L78 194 M96 168 L122 194 M140 168 L166 194 M184 168 L206 190" stroke="#e86f1e" stroke-width="11"/>
+    <rect x="34" y="168" width="172" height="26" fill="none"/>
+  </g>
+  <rect x="40" y="194" width="8" height="18" fill="#141414"/><rect x="192" y="194" width="8" height="18" fill="#141414"/>
+  <!-- sign -->
+  <rect x="66" y="126" width="108" height="30" rx="8" fill="#ffd21f" stroke="#141414" stroke-width="5"/>
+  <text x="120" y="148" text-anchor="middle" font-family="Verdana,sans-serif" font-weight="800" font-size="14.5" fill="#141414">COMING SOON</text>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <!-- Original placeholder: VTuber dome. Slot: Town > VTUBER. -->
+  <ellipse cx="120" cy="216" rx="90" ry="12" fill="#000" opacity="0.15"/>
+  <!-- dome -->
+  <path d="M28 208 Q28 84 120 84 Q212 84 212 208 Z" fill="#cdb4ff" stroke="#141414" stroke-width="7"/>
+  <path d="M62 208 Q62 116 120 116 Q178 116 178 208" fill="#e6dcff" opacity="0.8"/>
+  <line x1="120" y1="84" x2="120" y2="208" stroke="#141414" stroke-width="4" opacity="0.35"/>
+  <!-- door -->
+  <path d="M96 208 L96 168 Q120 150 144 168 L144 208 Z" fill="#141414"/>
+  <circle cx="120" cy="186" r="6" fill="#ffd21f"/>
+  <!-- star on top -->
+  <path d="M120 30 L129 54 L155 54 L134 69 L142 94 L120 79 L98 94 L106 69 L85 54 L111 54 Z" fill="#ffd21f" stroke="#141414" stroke-width="5" stroke-linejoin="round"/>
+  <!-- side screens -->
+  <rect x="38" y="160" width="30" height="24" rx="5" fill="#8fd8ff" stroke="#141414" stroke-width="5"/>
+  <rect x="172" y="160" width="30" height="24" rx="5" fill="#ffd3e4" stroke="#141414" stroke-width="5"/>
+</svg>

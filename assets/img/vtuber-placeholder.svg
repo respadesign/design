@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 720">
+  <!-- Original VTuber placeholder art: generic chibi silhouette inside an arch.
+       Used for every VTuber card until real model art replaces it per-item (data field: img). -->
+  <defs><linearGradient id="v" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#e6dcff"/><stop offset="1" stop-color="#ffd3e4"/>
+  </linearGradient></defs>
+  <path d="M60 700 L60 300 Q60 40 300 40 Q540 40 540 300 L540 700 Z" fill="url(#v)"/>
+  <ellipse cx="300" cy="668" rx="150" ry="18" fill="#000" opacity="0.10"/>
+  <path d="M300 400 L372 610 Q300 632 228 610 Z" fill="#8fd8ff" stroke="#141414" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="300" cy="300" r="128" fill="#ffe3cf" stroke="#141414" stroke-width="8"/>
+  <path d="M172 300 Q158 150 300 146 Q442 150 428 300 Q414 214 356 202 Q376 254 356 262 Q340 204 300 200 Q260 204 244 262 Q224 254 244 202 Q186 214 172 300Z" fill="#a5c8ff" stroke="#141414" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="254" cy="316" r="13" fill="#141414"/><circle cx="346" cy="316" r="13" fill="#141414"/>
+  <circle cx="259" cy="311" r="5" fill="#fff"/><circle cx="351" cy="311" r="5" fill="#fff"/>
+  <path d="M282 352 Q300 366 318 352" fill="none" stroke="#141414" stroke-width="7" stroke-linecap="round"/>
+  <ellipse cx="216" cy="346" rx="19" ry="10" fill="#ffb3cd"/><ellipse cx="384" cy="346" rx="19" ry="10" fill="#ffb3cd"/>
+  <text x="300" y="700" text-anchor="middle" font-family="Verdana,sans-serif" font-weight="700" font-size="24" fill="#8a6d84">placeholder model art</text>
+</svg>

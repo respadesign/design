@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <!-- Original placeholder: yellow stream-kit building with a screen. Slot: Town > STREAM KIT. -->
+  <ellipse cx="120" cy="216" rx="88" ry="12" fill="#000" opacity="0.15"/>
+  <rect x="46" y="58" width="148" height="150" rx="12" fill="#ffd21f" stroke="#141414" stroke-width="7"/>
+  <rect x="46" y="58" width="148" height="30" fill="#141414"/>
+  <circle cx="66" cy="73" r="6" fill="#ff6fa5"/><circle cx="86" cy="73" r="6" fill="#8fd8ff"/><circle cx="106" cy="73" r="6" fill="#a9ecc8"/>
+  <!-- screen -->
+  <rect x="66" y="102" width="108" height="66" rx="10" fill="#8fd8ff" stroke="#141414" stroke-width="6"/>
+  <path d="M106 118 L142 135 L106 152 Z" fill="#fff" stroke="#141414" stroke-width="5" stroke-linejoin="round"/>
+  <rect x="96" y="182" width="48" height="26" rx="7" fill="#141414"/>
+  <rect x="104" y="189" width="32" height="6" rx="3" fill="#ffd21f"/>
+  <!-- antenna -->
+  <line x1="120" y1="58" x2="120" y2="26" stroke="#141414" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="120" cy="20" r="8" fill="#ff6fa5" stroke="#141414" stroke-width="5"/>
+</svg>

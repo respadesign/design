@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 260">
+  <!-- Original shop banner placeholder. -->
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#ff6fa5"/><stop offset="0.55" stop-color="#ffb03a"/><stop offset="1" stop-color="#ffd21f"/>
+  </linearGradient></defs>
+  <rect width="1200" height="260" fill="url(#g)"/>
+  <circle cx="120" cy="60" r="26" fill="#fff" opacity="0.5"/><circle cx="1080" cy="200" r="34" fill="#fff" opacity="0.4"/>
+  <circle cx="980" cy="52" r="16" fill="#fff" opacity="0.6"/><circle cx="230" cy="205" r="18" fill="#fff" opacity="0.5"/>
+  <text x="600" y="118" text-anchor="middle" font-family="'Baloo 2',Verdana,sans-serif" font-weight="800" font-size="64" fill="#fff">RESPA SHOP</text>
+  <text x="600" y="172" text-anchor="middle" font-family="Verdana,sans-serif" font-weight="700" font-size="27" fill="#fff">ready-made overlays · badges · emotes · freebies</text>
+  <text x="600" y="222" text-anchor="middle" font-family="Verdana,sans-serif" font-size="21" fill="#fff" opacity="0.9">instant download — new drops every month!</text>
+</svg>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESPA Studio — Kawaii Emotes, Stream Kits, VTubers & Shop</title>
+<meta name="description" content="RESPA Studio (respadesign) — cute emote commissions, stream kits, VTuber models, a digital shop and a gacha mini-game.">
+<meta property="og:title" content="RESPA Studio — Kawaii Emotes, Stream Kits, VTubers & Shop">
+<meta property="og:description" content="Cute art commissions for streamers: emotes, stream kits, VTuber models, shop & gacha.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash" class="splash">
+  <button id="splash-mute" class="splash-mute" title="Toggle sound">🔇</button>
+  <img class="asset-logo splash-logo-img" alt="RESPA Studio logo">
+  <div class="splash-logo">RESPA<span>STUDIO</span></div>
+  <p class="splash-tag">✿ cute art for streamers ✿</p>
+  <button id="splash-enter" class="btn btn-big btn-pink">▶ Tap to enter</button>
+</div>
+
+<!-- LOADING -->
+<div id="loading" class="loading hidden">
+  <img class="asset-logo loading-logo-img" alt="RESPA Studio logo">
+  <div class="loading-logo">RESPA<span>STUDIO</span></div>
+  <div class="loading-track">
+    <div id="loading-walker" class="loading-walker">🐰</div>
+    <div id="loading-bar" class="loading-bar"></div>
+  </div>
+  <div class="loading-text">LOADING...</div>
+</div>
+
+<!-- HEADER (inner pages + town top bar) -->
+<header id="site-header" class="site-header hidden">
+  <a href="#/" class="logo" id="logo-home"><img class="asset-logo logo-img" alt="RESPA Studio"></a>
+  <div class="day-banner">HOW'S YOUR DAY? ☀️</div>
+  <nav class="pill-nav">
+    <a href="#/commission" data-nav="commission">COMMISSION</a>
+    <a href="#/gacha" data-nav="gacha">GACHA <span class="badge-new">New</span></a>
+    <a href="#/vtubers" data-nav="vtubers">VTUBERS</a>
+    <a href="#/shop" data-nav="shop">SHOP</a>
+    <a href="#/about" data-nav="about">ABOUT US</a>
+    <a href="#/tos" data-nav="tos">TOS</a>
+  </nav>
+  <div class="header-actions">
+    <a href="#/cart" class="icon-btn" title="Cart">🛒<span id="cart-count" class="cart-count hidden">0</span></a>
+    <div class="account-wrap">
+      <button id="account-btn" class="account-btn">👤 <span id="account-label">LOGIN</span></button>
+      <div id="account-menu" class="account-menu hidden">
+        <a href="#/profile">👤 Profile</a>
+        <a href="#/orders">📦 Orders</a>
+        <a href="#/cart">🛒 Cart</a>
+        <a href="#/wishlist">💖 Wishlist</a>
+        <button id="logout-btn">🚪 Log out</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- APP -->
+<main id="app"></main>
+
+<!-- FOOTER -->
+<footer id="site-footer" class="site-footer hidden">
+  <div class="footer-in">
+    <a href="#/"><img class="asset-logo logo-img footer-logo-img" alt="RESPA Studio"></a>
+    <nav class="footer-nav">
+      <a href="#/commission">Commission</a>
+      <a href="#/stream-kit">Stream Kit</a>
+      <a href="#/gacha">Gacha</a>
+      <a href="#/vtubers">VTubers</a>
+      <a href="#/shop">Shop</a>
+      <a href="#/about">About Us</a>
+      <a href="#/tos">Terms of Service</a>
+      <a href="#/how-to-order">How to Order</a>
+    </nav>
+    <div class="footer-social">
+      <a href="#" title="VGen">🎨 VGen</a>
+      <a href="#" title="Ko-fi">☕ Ko-fi</a>
+      <a href="#" title="Discord">💬 Discord</a>
+      <a href="#" title="Instagram">📸 Instagram</a>
+      <a href="#" title="X">𝕏</a>
+      <a href="#" title="TikTok">🎵 TikTok</a>
+      <a href="#" title="YouTube">▶️ YouTube</a>
+    </div>
+    <p class="footer-copy">© 2026 RESPA Studio · respadesign — all artwork is placeholder art for demo purposes ♡</p>
+  </div>
+</footer>
+
+<!-- CHAT WIDGET -->
+<button id="chat-btn" class="chat-btn">💬 Chat Me</button>
+<div id="chat-panel" class="chat-panel hidden">
+  <div class="chat-head">RESPA Studio ✿ <button id="chat-close">✕</button></div>
+  <div id="chat-log" class="chat-log"></div>
+  <form id="chat-form" class="chat-form">
+    <input id="chat-input" type="text" placeholder="Type a message…" autocomplete="off">
+    <button type="submit">➤</button>
+  </form>
+  <div class="chat-links">
+    <a href="https://www.fiverr.com/respadesign" target="_blank" rel="noopener">⭐ Fiverr: respadesign</a>
+    <a href="#" >💬 Discord (placeholder)</a>
+  </div>
+</div>
+
+<!-- SOUND TOGGLE -->
+<button id="sound-btn" class="sound-btn hidden" title="Toggle music">🔇</button>
+
+<!-- MODAL + TOAST ROOTS -->
+<div id="modal-root"></div>
+<div id="toast-root" class="toast-root"></div>
+
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

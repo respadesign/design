@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <!-- Original placeholder: orange emote house. Slot: Town of RESPA > EMOTE building. -->
+  <ellipse cx="120" cy="216" rx="86" ry="12" fill="#000" opacity="0.15"/>
+  <path d="M36 108 L120 34 L204 108 Z" fill="#e86f1e" stroke="#141414" stroke-width="7" stroke-linejoin="round"/>
+  <rect x="52" y="104" width="136" height="104" rx="10" fill="#ffb03a" stroke="#141414" stroke-width="7"/>
+  <rect x="98" y="146" width="44" height="62" rx="8" fill="#8a4b1d" stroke="#141414" stroke-width="6"/>
+  <circle cx="132" cy="178" r="5" fill="#ffd21f"/>
+  <rect x="66" y="118" width="30" height="30" rx="6" fill="#fff3bf" stroke="#141414" stroke-width="5"/>
+  <rect x="144" y="118" width="30" height="30" rx="6" fill="#fff3bf" stroke="#141414" stroke-width="5"/>
+  <!-- heart sign -->
+  <circle cx="120" cy="86" r="24" fill="#fff" stroke="#141414" stroke-width="6"/>
+  <path d="M120 100 C100 84 104 66 120 76 C136 66 140 84 120 100Z" fill="#ff6fa5"/>
+</svg>
