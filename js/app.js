@@ -281,8 +281,9 @@ function renderHome() {
   fit(true);
   addEventListener('resize', () => { if (document.getElementById('town-vp')) fit(false); });
   /* --- drag with pointer capture (the old once-only pointerup got stuck) --- */
-  let drag = null, movedPx = 0, suppressClick = false;
+  let drag = null, movedPx = 0, lastDown = null;
   vp.addEventListener('pointerdown', e => {
+    lastDown = { x: e.clientX, y: e.clientY };
     drag = { px: e.clientX, py: e.clientY, ox: town.x, oy: town.y, captured: false }; movedPx = 0;
     // NOTE: no pointer capture here — capturing on pointerdown retargets the
     // click event to the viewport and building buttons would never be clicked.
@@ -297,7 +298,7 @@ function renderHome() {
     }
     town.x = drag.ox + dx; town.y = drag.oy + dy; clampApply();
   });
-  const endDrag = () => { if (drag && movedPx > 7) { suppressClick = true; setTimeout(() => { suppressClick = false; }, 60); } drag = null; };
+  const endDrag = () => { drag = null; };
   vp.addEventListener('pointerup', endDrag);
   vp.addEventListener('pointercancel', endDrag);
   vp.addEventListener('wheel', e => {
@@ -311,8 +312,10 @@ function renderHome() {
   }, { passive: false });
   let coarse = false;
   try { coarse = matchMedia('(hover: none)').matches; } catch (e) { /* very old browser: assume mouse */ }
-  $$('.building', vp).forEach(btn => btn.addEventListener('click', () => {
-    if (suppressClick) return;
+  $$('.building', vp).forEach(btn => btn.addEventListener('click', e => {
+    // Ignore clicks that were really drags: compare the click's own release
+    // point with the pointerdown point (deterministic — no timing window).
+    if (e.clientX && lastDown && Math.abs(e.clientX - lastDown.x) + Math.abs(e.clientY - lastDown.y) > 10) return;
     const b = BUILDINGS.find(x => x.id === btn.dataset.b);
     if (coarse && town.selected !== b.id) { // touch: first tap shows the bubble, second tap enters
       town.selected = b.id;
