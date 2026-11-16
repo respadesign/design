@@ -342,5 +342,7 @@ details.acc p{margin-top:8px;color:var(--ink2);font-weight:700;line-height:1.55}
 .review-row:last-child{border-bottom:0}
 .empty-note{text-align:center;color:var(--ink2);font-weight:800;padding:44px 10px;font-size:17px}
 
-/* AI art: full-body VTuber art must not be cropped by the cover fit */
-.card .thumb img.art-img[src*="vtuber"],.modal-art img.art-img[src*="vtuber"]{object-fit:contain}
+/* AI art: full-body VTuber art fits inside its arch frame, never cropped or overflowing */
+.vt-card .arch{overflow:hidden}
+.vt-card .arch img.art-img{width:100%;height:100%;object-fit:contain;display:block}
+.modal-art img.art-img[src*="vtuber"]{object-fit:contain}
