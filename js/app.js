@@ -47,28 +47,55 @@ function openModal(html, wide) {
 function closeModal() { document.getElementById('modal-root').innerHTML = ''; }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-/* ---------------- sound (subtle WebAudio melody) ---------------- */
+/* ---------------- sound: WebAudio music box + SFX ----------------
+   Music starts only after a user gesture (browser autoplay rules):
+   the splash "Tap to enter" tap (or the gacha begin gate) starts it,
+   unless the visitor previously muted it — the choice is remembered. */
 const Sound = {
-  ctx: null, timer: null, on: Store.data.sound || false, step: 0,
-  notes: [523.25, 587.33, 659.25, 783.99, 659.25, 587.33],
-  ensure() { if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { /* no audio */ } } },
-  beep(freq, dur) {
+  ctx: null, timer: null, step: 0,
+  pref: Store.data.sound, // true = on, false = muted, undefined = not chosen yet
+  on: Store.data.sound === true,
+  melody: [523.25, 587.33, 659.25, 783.99, 880.0, 783.99, 659.25, 587.33, 523.25, 587.33, 659.25, 698.46, 659.25, 587.33, 493.88, 587.33],
+  bass: [130.81, 196.0, 146.83, 164.81],
+  ensure() {
+    if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { /* no audio */ } }
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  tone(freq, delay, dur, type, vol) {
     if (!this.ctx) return;
+    const t = this.ctx.currentTime + (delay || 0);
     const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-    o.type = 'sine'; o.frequency.value = freq;
-    g.gain.setValueAtTime(0.05, this.ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+    o.type = type || 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.045, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
     o.connect(g); g.connect(this.ctx.destination);
-    o.start(); o.stop(this.ctx.currentTime + dur);
+    o.start(t); o.stop(t + dur + 0.05);
+  },
+  beep(freq, dur) { this.tone(freq, 0, dur || 0.3, 'sine', 0.05); }, // legacy callers
+  sfx(name) {
+    if (!this.on) return;
+    this.ensure(); if (!this.ctx) return;
+    if (name === 'click') this.tone(1150, 0, 0.07, 'triangle', 0.035);
+    else if (name === 'select') { this.tone(880, 0, 0.12, 'sine', 0.05); this.tone(1318, 0.06, 0.14, 'sine', 0.04); }
+    else if (name === 'coin') { [988, 1319, 1568].forEach((f, i) => this.tone(f, i * 0.07, 0.16, 'square', 0.028)); }
+    else if (name === 'win') { [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, i * 0.09, 0.3, 'triangle', 0.05)); }
+    else if (name === 'error') this.tone(196, 0, 0.22, 'sawtooth', 0.03);
   },
   start() {
     this.ensure(); if (!this.ctx) return;
-    this.stop(); this.on = true; Store.data.sound = true; Store.save(); this.syncBtns();
-    this.timer = setInterval(() => { this.beep(this.notes[this.step % this.notes.length], 0.35); this.step++; }, 420);
+    this.stop(); this.on = true; this.pref = true; Store.data.sound = true; Store.save(); this.syncBtns();
+    this.timer = setInterval(() => {
+      if (!this.on) return;
+      this.tone(this.melody[this.step % this.melody.length], 0, 0.42, 'sine', 0.042);
+      if (this.step % 4 === 0) this.tone(this.bass[(this.step / 4) % this.bass.length], 0, 0.9, 'triangle', 0.026);
+      this.step++;
+    }, 430);
   },
   stop() { if (this.timer) clearInterval(this.timer); this.timer = null; },
+  autoStart() { if (this.pref === false) return; if (!this.on) this.start(); },
   toggle() {
-    if (this.on) { this.on = false; Store.data.sound = false; Store.save(); this.stop(); this.syncBtns(); }
+    if (this.on) { this.on = false; this.pref = false; Store.data.sound = false; Store.save(); this.stop(); this.syncBtns(); }
     else this.start();
     return this.on;
   },
@@ -76,8 +103,22 @@ const Sound = {
     const label = this.on ? '🔊' : '🔇';
     const sb = $('#sound-btn'); if (sb) sb.textContent = label;
     const sm = $('#splash-mute'); if (sm) sm.textContent = label;
+    const gm = $('#gacha-mute'); if (gm) gm.textContent = this.on ? '🔊 Mute background sound' : '🔇 Unmute background sound';
   },
 };
+
+/* ---------------- seasonal sale helpers ---------------- */
+const SALE_ON = !!(window.DATA && window.DATA.SALE && window.DATA.SALE.active);
+const SALE_PCT = SALE_ON ? window.DATA.SALE.pct : 0;
+function salePrice(p) { return SALE_ON ? Math.round(p * (100 - SALE_PCT)) / 100 : p; }
+function priceHTML(p, cls) {
+  if (!SALE_ON) return `<span class="${cls || 'price'}">${money(p)}</span>`;
+  return `<span class="price-was">${money(p)}</span> <span class="${cls || 'price'}">${money(salePrice(p))}</span> <span class="sale-badge">−${SALE_PCT}%</span>`;
+}
+function vtuberPriceLabel(i) {
+  if (!SALE_ON) return i.priceLabel;
+  return money(salePrice(i.priceMin)) + ' – ' + money(salePrice(i.priceMax));
+}
 
 /* ---------------- header / chrome ---------------- */
 function updateHeader() {
@@ -114,7 +155,12 @@ function addToCartGuarded(item, silent) {
 let entered = sessionStorage.getItem('respa_entered') === '1';
 function initSplash() {
   if (entered) { $('#splash').classList.add('hidden'); showChrome(); return; }
+  const walker = $('#loading-walker');
+  if (walker) walker.innerHTML = `<img src="${esc(A.mascot)}" alt="">`;
+  const ptWalker = document.querySelector('.pt-walker');
+  if (ptWalker) ptWalker.innerHTML = `<img src="${esc(A.mascot)}" alt="">`;
   $('#splash-enter').onclick = () => {
+    Sound.autoStart();
     $('#splash').classList.add('hidden');
     const load = $('#loading'); load.classList.remove('hidden');
     let p = 0;
@@ -141,23 +187,53 @@ function initSplash() {
 /* ============================================================
    HOME — Town of RESPA (pannable map)
    ============================================================ */
-let town = { x: -140, y: -170, scale: 1, selected: null };
+const WORLD = { w: 1920, h: 1280 };
+let town = { x: 0, y: 0, scale: 1, base: 1, userZoom: false, selected: null };
 const BUILDINGS = [
-  { id: 'emote',    emoji: '🏠', name: 'EMOTE',       label: '✿ Emote commissions this way!', x: 300,  y: 600, route: '#/commission' },
-  { id: 'streamkit',emoji: '🏬', name: 'STREAM KIT',  label: '📺 Full stream packages!',      x: 1140, y: 500, route: '#/stream-kit' },
-  { id: 'about',    emoji: '🏩', name: 'ABOUT US',    label: '💖 Meet the studio!',           x: 430,  y: 250, route: '#/about' },
-  { id: 'gacha',    emoji: '🎰', name: 'GACHA',       label: '🎁 Try your luck — free coins!', x: 1330, y: 210, route: '#/gacha' },
-  { id: 'vtuber',   emoji: '🔮', name: 'VTUBER',      label: '🎀 Live2D models & adopts!',    x: 1420, y: 640, route: '#/vtubers' },
-  { id: 'shop',     emoji: '🏪', name: 'SHOP',        label: '🛍️ Ready-made goodies!',       x: 900,  y: 740, route: '#/shop' },
-  { id: 'soon',     emoji: '🚧', name: 'COMING SOON', label: '🚧 Under construction… check back later!', x: 1180, y: 800, route: null },
+  { id: 'emote',    emoji: '🏠', name: 'EMOTE',       label: '✿ Emote commissions this way!', x: 300,  y: 590, route: '#/commission' },
+  { id: 'streamkit',emoji: '🏬', name: 'STREAM KIT',  label: '📺 Full stream packages!',      x: 1400, y: 630, route: '#/stream-kit' },
+  { id: 'about',    emoji: '🏩', name: 'ABOUT US',    label: '💖 Meet the studio!',           x: 285,  y: 150, route: '#/about' },
+  { id: 'gacha',    emoji: '🎰', name: 'GACHA',       label: '🎁 Try your luck — free coins!', x: 1150, y: 165, route: '#/gacha' },
+  { id: 'vtuber',   emoji: '🔮', name: 'VTUBER',      label: '🎀 Live2D models & adopts!',    x: 1470, y: 285, route: '#/vtubers' },
+  { id: 'shop',     emoji: '🏪', name: 'SHOP',        label: '🛍️ Ready-made goodies!',       x: 1180, y: 845, route: '#/shop' },
+  { id: 'soon',     emoji: '🚧', name: 'COMING SOON', label: '🚧 Under construction… check back later!', x: 170, y: 915, route: null },
 ];
+
+/* One rAF loop drives every town animation (walker, fountain, water).
+   route() calls TownAnim.stop() on every navigation, so nothing leaks
+   or stacks when the visitor leaves and returns to the map. */
+const TownAnim = {
+  raf: 0, running: false,
+  stop() { this.running = false; if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0; },
+  start(walker, fountain, water) {
+    this.stop(); this.running = true;
+    [...A.sprites.walk, ...A.sprites.fountain, ...A.sprites.water].forEach(src => { const im = new Image(); im.src = src; });
+    let x = 320, dir = 1, dist = 0, last = performance.now(), fAcc = 0, wAcc = 0;
+    const SPEED = 58; // world px per second
+    const tick = (now) => {
+      if (!this.running) return;
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      x += dir * SPEED * dt; dist += SPEED * dt;
+      if (x > 1620) { x = 1620; dir = -1; }
+      if (x < 250) { x = 250; dir = 1; }
+      walker.style.transform = `translateX(${x}px) scaleX(${dir})`;
+      const wf = Math.floor(dist / 17) % 8;
+      if (walker.dataset.f != wf) { walker.dataset.f = wf; walker.src = A.sprites.walk[wf]; }
+      fAcc += dt;
+      if (fAcc > 0.13) { fAcc = 0; const nf = ((+fountain.dataset.f || 0) + 1) % 6; fountain.dataset.f = nf; fountain.src = A.sprites.fountain[nf]; }
+      wAcc += dt;
+      if (wAcc > 0.26) { wAcc = 0; const nw = ((+water.dataset.f || 0) + 1) % 4; water.dataset.f = nw; water.src = A.sprites.water[nw]; }
+      this.raf = requestAnimationFrame(tick);
+    };
+    this.raf = requestAnimationFrame(tick);
+  },
+};
+
 function renderHome() {
-  const trees = [[180, 180], [560, 560], [1040, 300], [1240, 420], [700, 880], [360, 860], [1520, 340], [980, 120]]
-    .map(([x, y], i) => `<span class="tree" style="left:${x}px;top:${y}px">${i % 2 ? '🌳' : '🌲'}</span>`).join('');
-  const flowers = [[520, 470], [880, 560], [1120, 700], [640, 660], [1480, 520], [420, 420], [1300, 900], [240, 300]]
-    .map(([x, y], i) => `<span class="flower" style="left:${x}px;top:${y}px">${['🌸', '🌼', '🌷', '🌻'][i % 4]}</span>`).join('');
-  const npcs = [[840, 420, '🐰'], [1020, 620, '🐱'], [620, 300, '🦊'], [1380, 430, '🐶']]
-    .map(([x, y, e]) => `<span class="npc" style="left:${x}px;top:${y}px">${e}</span>`).join('');
+  TownAnim.stop();
+  const sp = A.sprites;
+  const treesAt = [[110, 415, 0, 205], [695, 250, 3, 175], [1045, 465, 1, 185], [1700, 765, 2, 215], [610, 890, 4, 165], [80, 685, 5, 195]];
+  const trees = treesAt.map(([x, y, t, h], i) => `<img class="tree-sprite sway" style="left:${x}px;top:${y}px;height:${h}px;animation-delay:${(i % 4) * 0.7}s" src="${sp.trees[t]}" alt="">`).join('');
   const buildings = BUILDINGS.map(b => `
     <button class="building" data-b="${b.id}" style="left:${b.x}px;top:${b.y}px">
       <span class="bubble">${esc(b.label)}</span>
@@ -167,44 +243,80 @@ function renderHome() {
   app.innerHTML = `
   <div class="town-shell">
     <div class="town-viewport" id="town-vp">
-      <div class="town-scene" id="town-scene" style="background-image:url('${esc(A.townBg)}');background-size:cover">
-        <div class="bridge"></div>
-        <div class="windmill">🌬️</div>
-        <div class="town-sign">✿ Town of RESPA ✿</div>
-        ${trees}${flowers}${npcs}${buildings}
+      <div class="town-scene" id="town-scene" style="width:${WORLD.w}px;height:${WORLD.h}px;background-image:url('${esc(A.townBg)}');background-size:cover">
+        <div class="cloud cloud-a"></div><div class="cloud cloud-b"></div>
+        ${trees}
+        <img id="town-fountain" class="fountain-sprite" data-f="0" src="${sp.fountain[0]}" alt="Crystal fountain">
+        <div class="pond"><img id="town-water" data-f="0" src="${sp.water[0]}" alt=""></div>
+        <img class="xmas-sprite" style="left:690px;top:505px;height:215px" src="${sp.xmas.tree}" alt="Christmas tree">
+        <img class="xmas-sprite" style="left:1115px;top:745px;height:120px" src="${sp.xmas.snowman}" alt="Snowman">
+        <img class="xmas-sprite" style="left:1335px;top:1095px;height:95px" src="${sp.xmas.gifts}" alt="Gifts">
+        <img class="xmas-sprite" style="left:1555px;top:985px;height:110px" src="${sp.xmas.sleigh}" alt="Sleigh">
+        <img id="town-walker" class="walker" data-f="0" src="${sp.walk[0]}" alt="RESPA mascot out for a walk">
+        ${buildings}
+        <div class="town-sign">✦ Town of RESPA ✦</div>
       </div>
       <div class="rotate-hint"><span style="font-size:44px">📱↔️</span>Rotate your phone to landscape<br>for the best town view!</div>
-      <div class="town-hint">🖱️ Drag to explore the town · Click a building twice to enter</div>
+      <div class="town-hint">🖱️ Drag to explore · Click a building to enter · RESPA is out for a walk!</div>
     </div>
   </div>`;
   const vp = $('#town-vp'), scene = $('#town-scene');
-  const apply = () => { scene.style.transform = `translate(${town.x}px,${town.y}px) scale(${town.scale})`; };
-  apply();
-  let drag = null, moved = false;
-  vp.addEventListener('pointerdown', e => { drag = { sx: e.clientX - town.x, sy: e.clientY - town.y }; moved = false; });
+  const clampApply = () => {
+    const sw = WORLD.w * town.scale, sh = WORLD.h * town.scale;
+    const vw = vp.clientWidth, vh = vp.clientHeight;
+    town.x = sw <= vw ? (vw - sw) / 2 : Math.max(vw - sw, Math.min(0, town.x));
+    town.y = sh <= vh ? (vh - sh) / 2 : Math.max(vh - sh, Math.min(0, town.y));
+    scene.style.transform = `translate(${town.x}px,${town.y}px) scale(${town.scale})`;
+  };
+  const fit = (center) => {
+    town.base = Math.max(vp.clientWidth / WORLD.w, vp.clientHeight / WORLD.h) * 1.04;
+    if (!town.userZoom) town.scale = town.base;
+    if (center) { town.x = vp.clientWidth / 2 - 960 * town.scale; town.y = vp.clientHeight / 2 - 640 * town.scale; }
+    clampApply();
+  };
+  fit(true);
+  addEventListener('resize', () => { if (document.getElementById('town-vp')) fit(false); });
+  /* --- drag with pointer capture (the old once-only pointerup got stuck) --- */
+  let drag = null, movedPx = 0, suppressClick = false;
+  vp.addEventListener('pointerdown', e => {
+    drag = { px: e.clientX, py: e.clientY, ox: town.x, oy: town.y }; movedPx = 0;
+    try { vp.setPointerCapture(e.pointerId); } catch (err) { /* older browser */ }
+  });
   vp.addEventListener('pointermove', e => {
     if (!drag) return;
-    const nx = e.clientX - drag.sx, ny = e.clientY - drag.sy;
-    if (Math.abs(nx - town.x) + Math.abs(ny - town.y) > 4) moved = true;
-    town.x = Math.max(-900, Math.min(60, nx)); town.y = Math.max(-520, Math.min(60, ny)); apply();
+    const dx = e.clientX - drag.px, dy = e.clientY - drag.py;
+    movedPx = Math.max(movedPx, Math.abs(dx) + Math.abs(dy));
+    town.x = drag.ox + dx; town.y = drag.oy + dy; clampApply();
   });
-  window.addEventListener('pointerup', () => { drag = null; }, { once: true });
+  const endDrag = () => { if (drag && movedPx > 7) { suppressClick = true; setTimeout(() => { suppressClick = false; }, 60); } drag = null; };
+  vp.addEventListener('pointerup', endDrag);
+  vp.addEventListener('pointercancel', endDrag);
   vp.addEventListener('wheel', e => {
     e.preventDefault();
-    town.scale = Math.max(0.6, Math.min(1.5, town.scale - Math.sign(e.deltaY) * 0.08)); apply();
+    const rect = vp.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const wx = (mx - town.x) / town.scale, wy = (my - town.y) / town.scale;
+    town.scale = Math.max(town.base * 0.85, Math.min(town.base * 2.4, town.scale * (e.deltaY < 0 ? 1.09 : 0.92)));
+    town.userZoom = true;
+    town.x = mx - wx * town.scale; town.y = my - wy * town.scale; clampApply();
   }, { passive: false });
+  let coarse = false;
+  try { coarse = matchMedia('(hover: none)').matches; } catch (e) { /* very old browser: assume mouse */ }
   $$('.building', vp).forEach(btn => btn.addEventListener('click', () => {
-    if (moved) return;
+    if (suppressClick) return;
     const b = BUILDINGS.find(x => x.id === btn.dataset.b);
-    if (town.selected !== b.id) {
+    if (coarse && town.selected !== b.id) { // touch: first tap shows the bubble, second tap enters
       town.selected = b.id;
       $$('.building', vp).forEach(x => x.classList.toggle('selected', x.dataset.b === b.id));
-      Sound.ensure(); if (Sound.on) Sound.beep(880, 0.15);
+      Sound.sfx('select');
       return;
     }
+    town.selected = b.id;
+    Sound.sfx('select');
     if (b.route) location.hash = b.route;
     else toast('🚧 Coming soon — this spot is still being built!');
   }));
+  TownAnim.start($('#town-walker'), $('#town-fountain'), $('#town-water'));
 }
 
 /* ============================================================
@@ -228,7 +340,7 @@ function commissionCard(item) {
     <button class="cart-add" data-add="${item.id}" title="Add to cart">🛒</button>
     <div class="meta"><h3>${esc(item.name)}</h3>
       <div>${item.tags.map((t, i) => `<span class="tag ${i % 2 ? 'alt' : ''}">#${t}</span>`).join('')}</div>
-      <div class="row"><span class="price">${money(item.price)}</span><span class="sold-note">${item.type}</span></div>
+      <div class="row"><span>${priceHTML(item.price)}</span><span class="sold-note">${item.type}</span></div>
     </div></div>`;
 }
 function bindCommissionCards(scope, items) {
@@ -239,7 +351,7 @@ function bindCommissionCards(scope, items) {
   $$('[data-add]', scope).forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
     const it = items.find(x => x.id === b.dataset.add);
-    addToCartGuarded({ key: 'comm-' + it.id, kind: 'commission', refId: it.id, name: it.name + ' (' + it.code + ')', price: it.price, emoji: it.emoji, hue: it.hue, img: it.img });
+    addToCartGuarded({ key: 'comm-' + it.id, kind: 'commission', refId: it.id, name: it.name + ' (' + it.code + ')', price: salePrice(it.price), emoji: it.emoji, hue: it.hue, img: it.img });
     route();
   }));
   $$('[data-open]', scope).forEach(c => c.addEventListener('click', () => openCommissionDetail(c.dataset.open)));
@@ -255,7 +367,7 @@ function openCommissionDetail(id) {
     <p style="margin:8px 0">${it.tags.map(t => `<span class="tag">#${t}</span>`).join('')} <span class="tag alt">${esc(it.categoryLabel)}</span> <span class="tag alt">${esc(it.type)}</span></p>
     <p style="font-weight:700;color:var(--ink2);line-height:1.6">A cute “your character here” ${esc(it.type.toLowerCase())} slot, hand-drawn to match your character, pet or mascot. You receive every platform size plus a bonus large PNG. Turnaround 2–3 weeks.</p>
     <div class="row" style="display:flex;justify-content:space-between;align-items:center;margin:16px 0">
-      <span class="price" style="font-size:28px">${money(it.price)}</span><span class="sold-note">${it.sold} sold · listed ${it.date}</span>
+      <span style="font-size:22px">${priceHTML(it.price)}</span><span class="sold-note">${it.sold} sold · listed ${it.date}</span>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-pink" id="d-checkout">Checkout Now</button>
@@ -263,7 +375,7 @@ function openCommissionDetail(id) {
       <a class="btn btn-white" href="#/how-to-order" onclick="closeModal()">Not sure how to order?</a>
     </div>`);
   $('#d-fav').onclick = () => { Store.toggleFav(it.id); openCommissionDetail(it.id); route(); };
-  const asCart = () => ({ key: 'comm-' + it.id, kind: 'commission', refId: it.id, name: it.name + ' (' + it.code + ')', price: it.price, emoji: it.emoji, hue: it.hue, img: it.img });
+  const asCart = () => ({ key: 'comm-' + it.id, kind: 'commission', refId: it.id, name: it.name + ' (' + it.code + ')', price: salePrice(it.price), emoji: it.emoji, hue: it.hue, img: it.img });
   $('#d-add').onclick = () => { if (addToCartGuarded(asCart())) { closeModal(); route(); } };
   $('#d-checkout').onclick = () => {
     if (!requireLogin('Log in to check out ♡')) { closeModal(); return; }
@@ -289,6 +401,7 @@ function renderCommission(catId) {
   items = items.slice().sort(sorters[commState.sort] || sorters.new);
   app.innerHTML = `<div class="page wrap">
     <div class="sec-head"><h1>🎨 Commission — ${esc(cat.label)}</h1><p>Pick a YCH slot, we draw your character in it. That simple!</p></div>
+    ${saleStrip()}
     <div class="comm-layout">
       <aside class="side"><h3>Categories</h3>
         ${D.COMMISSION_CATEGORIES.map(c => `<a href="#/commission/${c.id}" class="${c.id === cat.id ? 'on' : ''}">${esc(c.label)} <span class="sold-note">(${c.count})</span></a>`).join('')}
@@ -398,6 +511,7 @@ function renderStreamKit() {
   const items = D.STREAMKIT_ITEMS.filter(i => i.tab === skState.sub);
   app.innerHTML = `<div class="page wrap">
     <div class="sec-head"><h1>📺 Stream Kit</h1><p>Ready-made animated stream packages — screens, alerts, panels & more.</p></div>
+    ${saleStrip()}
     <div class="tabs">
       <a class="tab" href="#/commission" style="font-family:var(--font-head);font-weight:800;padding:10px 20px;border-radius:999px;background:#fff;border:3px solid #f0d060;color:var(--ink2)">YCH EMOTES</a>
       <button class="tab on">YCH STREAM KIT</button>
@@ -409,7 +523,7 @@ function renderStreamKit() {
         <div class="thumb" style="${thumbStyle(i)}">${artInner(i)}
           <div class="vid-ui"><button class="play-btn" data-play="${i.id}">▶</button><span>⏱ ${i.duration}</span><span>🔇</span></div></div>
         <div class="meta"><h3>${esc(i.name)}</h3>
-          <div class="row"><span class="price">${money(i.price)}</span>
+          <div class="row"><span>${priceHTML(i.price)}</span>
           <button class="btn btn-yellow" style="padding:6px 16px;font-size:14px" data-add-sk="${i.id}">＋ Add</button></div>
         </div></div>`).join('') || '<div class="empty-note">Nothing here yet 🌧️</div>'}
     </div>
@@ -422,7 +536,7 @@ function renderStreamKit() {
   });
   $$('[data-add-sk]').forEach(b => b.onclick = () => {
     const i = D.STREAMKIT_ITEMS.find(x => x.id === b.dataset.addSk);
-    if (addToCartGuarded({ key: 'sk-' + i.id, kind: 'streamkit', refId: i.id, name: i.name, price: i.price, emoji: i.emoji, hue: i.hue, img: i.img })) renderStreamKit();
+    if (addToCartGuarded({ key: 'sk-' + i.id, kind: 'streamkit', refId: i.id, name: i.name, price: salePrice(i.price), emoji: i.emoji, hue: i.hue, img: i.img })) renderStreamKit();
   });
 }
 
@@ -434,12 +548,13 @@ function renderVtubers() {
   const items = D.VTUBER_ITEMS.filter(i => i.tab === vtState.tab);
   app.innerHTML = `<div class="page wrap" style="background:linear-gradient(180deg,#fff6cf,#ffe9a8);border-radius:26px">
     <div class="sec-head"><h1>🎀 VTuber Models</h1><p>Full models, chibi models, and ready-to-adopt designs — rigging included.</p></div>
+    ${saleStrip()}
     <div class="tabs" style="justify-content:center">${D.VTUBER_TABS.map(t => `<button class="tab ${vtState.tab === t.id ? 'on' : ''}" data-vt="${t.id}">${t.label}</button>`).join('')}</div>
     <div class="vt-grid">
       ${items.map(i => `<div class="vt-card">
         ${i.soldOut ? '<span class="sold-out">SOLD OUT</span>' : ''}
         <div class="arch" style="${thumbStyle(i)}">${i.img ? `<img class="arch-img contain" src="${esc(i.img)}" alt="${esc(i.name)}">` : `<img class="arch-img" src="${esc(A.vtuberPlaceholder)}" alt="VTuber placeholder art">`}</div>
-        <h3>${esc(i.name)}</h3><div class="price">${i.priceLabel}</div>
+        <h3>${esc(i.name)}</h3><div class="price">${vtuberPriceLabel(i)}${SALE_ON ? ' <span class="sale-badge">−20%</span>' : ''}</div>
         <button class="btn btn-yellow" style="margin-top:10px;padding:8px 18px;font-size:14px" data-vt-detail="${i.id}" ${i.soldOut ? 'disabled' : ''}>${i.soldOut ? 'SOLD OUT' : 'SHOW DETAIL'}</button>
       </div>`).join('')}
     </div></div>`;
@@ -449,7 +564,7 @@ function renderVtubers() {
     const i = D.VTUBER_ITEMS.find(x => x.id === b.dataset.vtDetail);
     openModal(`<div class="modal-art" style="${thumbStyle(i)}">${i.img ? `<img class="arch-img contain" src="${esc(i.img)}" alt="${esc(i.name)}">` : `<img class="arch-img contain" src="${esc(A.vtuberPlaceholder)}" alt="VTuber placeholder art">`}</div>
       <h2>${esc(i.name)}</h2>
-      <p style="font-weight:800;margin:6px 0"><span class="price" style="font-size:24px">${i.priceLabel}</span></p>
+      <p style="font-weight:800;margin:6px 0"><span class="price" style="font-size:24px">${vtuberPriceLabel(i)}</span>${SALE_ON ? ' <span class="sale-badge">−20%</span>' : ''}</p>
       <p style="font-weight:700;color:var(--ink2);line-height:1.65">A hand-drawn ${i.tab === 'chibi' ? 'chibi' : 'full'} VTuber model in RESPA's signature cute style. Placeholder description — final copy and real artwork will replace this.</p>
       <ul style="margin:12px 0 12px 20px;font-weight:700;color:var(--ink2);line-height:1.7">
         <li>Live2D model art (.psd, separated layers)</li><li>Rigging included — ready for VTube Studio</li>
@@ -468,10 +583,14 @@ function shopCard(i) {
     <div class="thumb" style="${thumbStyle(i)}">${artInner(i)}</div>
     <div class="meta"><span class="tag alt">${esc(i.category)}</span>
       <h3 style="margin-top:5px">${esc(i.name)}</h3>
-      <div class="row"><span class="price">${i.originalPrice ? `<s>${money(i.originalPrice)}</s>` : ''}${i.free ? '$0 · Free' : money(i.price)}</span>
+      <div class="row"><span>${i.originalPrice ? `<span class="price-was">${money(i.originalPrice)}</span> ` : ''}${i.free ? '<span class="price">$0 · Free</span>' : priceHTML(i.price)}</span>
       <span class="stars">★ ${i.rating}</span></div>
       <div class="sold-note">${i.sold} sold</div>
     </div></div>`;
+}
+function saleStrip() {
+  if (!SALE_ON) return '';
+  return `<div class="sale-strip"><img src="${esc(A.santa)}" alt="Santa RESPA"><div><b>🎄 Christmas Sale — ${SALE_PCT}% OFF everything!</b><span>Commission, stream kits, VTuber models & shop list prices — discount already applied. Happy holidays from RESPA Studio!</span></div><span class="sale-strip-badge">−${SALE_PCT}%</span></div>`;
 }
 function renderShop() {
   let items = D.SHOP_ITEMS.slice();
@@ -490,6 +609,7 @@ function renderShop() {
   D.SHOP_CATEGORIES.forEach(([c, n]) => counts[c] = n);
   app.innerHTML = `<div class="page wrap">
     <img class="banner-img" src="${esc(A.shopBanner)}" alt="RESPA Shop — ready-made overlays, badges, emotes and freebies" style="margin-bottom:22px">
+    ${saleStrip()}
     <div class="shop-layout">
       <aside class="side"><h3>🗂️ Categories</h3>
         ${['All', ...D.SHOP_CATEGORIES.map(c => c[0])].map(c => `<div class="cat-radio ${shopState.cat === c ? 'on' : ''}" data-cat="${esc(c)}"><span>${c === 'All' ? '✿ Everything' : esc(c)}</span><span class="cnt">${counts[c]}</span></div>`).join('')}
@@ -534,9 +654,10 @@ function renderProduct(slug) {
         <span class="tag alt">${esc(i.category)}</span>
         <h1 style="font-size:34px;margin:8px 0">${esc(i.name)}</h1>
         <p><span class="stars">★ ${i.rating}</span> · <b>${i.sold} sold</b> · listed ${i.date}</p>
-        <p class="price" style="font-size:32px;margin:12px 0">${i.originalPrice ? `<s>${money(i.originalPrice)}</s>` : ''}${i.free ? '$0 · Freebie' : money(i.price)}</p>
+        <p style="font-size:26px;margin:12px 0">${i.originalPrice ? `<span class="price-was">${money(i.originalPrice)}</span> ` : ''}${i.free ? '<span class="price">$0 · Freebie</span>' : priceHTML(i.price)}</p>
+        ${SALE_ON && !i.free ? `<p class="sold-note" style="margin-bottom:8px">🎄 ${window.DATA.SALE.note}</p>` : ''}
         <label style="font-family:var(--font-head);font-weight:700;display:grid;gap:6px;max-width:320px">Pay what you want (min ${money(minPwyw)})
-          <input class="input" id="pwyw" type="number" step="0.50" min="${minPwyw}" value="${i.price}"></label>
+          <input class="input" id="pwyw" type="number" step="0.50" min="${minPwyw}" value="${salePrice(i.price)}"></label>
         <div style="display:flex;gap:10px;margin:18px 0;flex-wrap:wrap">
           <button class="btn btn-pink" id="pdp-add">🛒 Add to cart</button>
           <a class="btn btn-white" href="#/shop">Keep browsing</a>
@@ -602,6 +723,7 @@ function renderGacha() {
           <button class="btn btn-white" id="daily" ${Store.canClaimDaily() ? '' : 'disabled'}>🗓️ Claim daily coins +500 ${Store.canClaimDaily() ? '' : '(claimed today)'}</button>
           <button class="btn btn-white" id="gacha-faq">❓ FAQ</button>
           <button class="btn btn-white" id="gacha-collection">📦 My Rewards (${owned}/20)</button>
+          <button class="btn btn-white" id="gacha-mute">🔊 Mute background sound</button>
           <a class="btn btn-white" href="#/">🏘️ Back to town</a>
         </div>
         <h2 style="margin:34px 0 14px">📦 Rewards Collection — ${owned}/20</h2>
@@ -615,7 +737,7 @@ function renderGacha() {
         }).join('')}</div>`}
     </div></div>`;
   if (!gachaStarted) {
-    const begin = () => { gachaStarted = true; renderGacha(); };
+    const begin = () => { Sound.autoStart(); gachaStarted = true; renderGacha(); };
     $('#gacha-begin').onclick = begin;
     const keyH = () => { document.removeEventListener('keydown', keyH); if ((location.hash || '').startsWith('#/gacha')) begin(); };
     document.addEventListener('keydown', keyH);
@@ -630,13 +752,16 @@ function renderGacha() {
     const faq = $('#gacha-faq'); if (faq) faq.onclick = () => openModal(`<h2>❓ Gacha FAQ</h2>${D.GACHA_FAQ.map(([q, a]) => `<div class="review-row"><b>${esc(q)}</b><p style="font-weight:700;color:var(--ink2)">${esc(a)}</p></div>`).join('')}`);
     const col = $('#gacha-collection'); if (col) col.onclick = () => document.querySelector('.reward-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     const skip = $('#pull-skip'); if (skip) skip.onclick = revealRewards;
+    const gm = $('#gacha-mute'); if (gm) gm.onclick = () => { Sound.toggle(); Sound.syncBtns(); };
+    Sound.syncBtns();
   };
   bind();
 }
 function doPull(n) {
   const cost = n === 5 ? 450 : 100;
   const g = Store.gacha();
-  if (g.balance < cost) { toast('Not enough coins 🌧️ Claim your daily +500!'); return; }
+  if (g.balance < cost) { Sound.sfx('error'); toast('Not enough coins 🌧️ Claim your daily +500!'); return; }
+  Sound.sfx('coin');
   Store.setBalance(g.balance - cost);
   pendingRewards = Array.from({ length: n }, rollReward);
   gachaAnimating = true; renderGacha();
@@ -656,6 +781,7 @@ function revealRewards() {
     return { r, isNew };
   });
   if (dupCoins > 0) Store.setBalance(Store.gacha().balance + dupCoins);
+  Sound.sfx('win');
   Store.save(); updateHeader();
   openModal(`<h2 style="text-align:center">🎉 Your Rewards!</h2>
     ${dupCoins ? `<p style="text-align:center;font-weight:800;margin:6px 0">Duplicates converted: +${dupCoins} coins 🪙</p>` : ''}
@@ -894,6 +1020,7 @@ function render404() {
    ROUTER
    ============================================================ */
 function route() {
+  TownAnim.stop();
   closeModal();
   const hash = location.hash || '#/';
   const parts = hash.replace(/^#\//, '').split('/');
@@ -919,7 +1046,27 @@ function route() {
   else render404();
   updateHeader();
 }
-window.addEventListener('hashchange', route);
+/* Page transitions: a short loading overlay (logo + progress bar +
+   mascot) plays on every route change — the reference site's pattern. */
+let transToken = 0;
+function routeWithTransition() {
+  if (!entered) { route(); return; }
+  const ov = $('#page-transition');
+  if (!ov) { route(); return; }
+  const token = ++transToken;
+  ov.classList.remove('hidden');
+  requestAnimationFrame(() => ov.classList.add('show'));
+  setTimeout(() => {
+    if (token !== transToken) return;
+    route();
+    setTimeout(() => {
+      if (token !== transToken) return;
+      ov.classList.remove('show');
+      setTimeout(() => { if (token === transToken) ov.classList.add('hidden'); }, 240);
+    }, 80);
+  }, 430);
+}
+window.addEventListener('hashchange', routeWithTransition);
 
 /* ============================================================
    CHAT WIDGET + HEADER EVENTS + SOUND BUTTON
@@ -975,8 +1122,45 @@ function initHeader() {
   $('#sound-btn').onclick = () => { Sound.toggle(); toast(Sound.on ? 'Music on 🎵' : 'Music off 🔇'); };
 }
 
+/* ---------------- global click SFX (subtle, throttled) ---------------- */
+let lastClickSfx = 0;
+document.addEventListener('click', e => {
+  if (!Sound.on) return;
+  if (!e.target.closest('button, a.btn, .chip, .tab, .cat-radio')) return;
+  const now = Date.now(); if (now - lastClickSfx < 70) return;
+  lastClickSfx = now; Sound.sfx('click');
+}, true);
+
+/* ---------------- Christmas snow ---------------- */
+const Snow = {
+  cv: null, cx: null, flakes: [], raf: 0, running: false,
+  start() {
+    if (this.running) return;
+    this.cv = $('#snow-canvas'); if (!this.cv) return;
+    this.cx = this.cv.getContext('2d');
+    if (!this.cx) { this.running = false; return; }
+    this.running = true;
+    const fit = () => { this.cv.width = innerWidth; this.cv.height = innerHeight; };
+    fit(); addEventListener('resize', fit);
+    this.flakes = Array.from({ length: 70 }, () => ({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: 1 + Math.random() * 2.4, s: 0.4 + Math.random() * 0.9, ph: Math.random() * 6.28 }));
+    const tick = () => {
+      if (!this.running) return;
+      const { cx, cv } = this; cx.clearRect(0, 0, cv.width, cv.height);
+      cx.fillStyle = 'rgba(255,255,255,.85)';
+      for (const f of this.flakes) {
+        f.y += f.s; f.ph += 0.008; f.x += Math.sin(f.ph) * 0.4;
+        if (f.y > cv.height + 4) { f.y = -4; f.x = Math.random() * cv.width; }
+        cx.beginPath(); cx.arc(f.x, f.y, f.r, 0, 6.29); cx.fill();
+      }
+      this.raf = requestAnimationFrame(tick);
+    };
+    tick();
+  },
+};
+
 /* ---------------- boot ---------------- */
 applyShellAssets();
+Snow.start();
 initSplash();
 initHeader();
 initChat();

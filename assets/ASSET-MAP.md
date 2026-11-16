@@ -28,3 +28,12 @@ Config source of truth: `ASSETS` in `js/data.js`.
 2. New filename/format? Change it once in `ASSETS` (`js/data.js`).
 3. Per-item art always goes through the `img` field — never hardcode an image
    path inside page templates.
+
+## Animated sprites (assets/img/sprites/)
+Frame sequences driven by one animation loop on the town page — replace frame-for-frame, same filenames:
+- walk-01..08.svg — mascot walk cycle (side view, facing right)
+- fountain-01..06.svg — crystal fountain loop (placed on the plaza)
+- water-01..04.svg — pond water surface loop
+- tree-01..06.svg — fantasy trees (sway via CSS)
+- xmas-*.svg — Christmas decor: tree, snowman, gifts, wreath, lantern, sleigh
+- ../mascot-santa.svg — Christmas mascot used in the sale banners

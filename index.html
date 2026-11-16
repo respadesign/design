@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <meta property="og:image" content="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Cinzel+Decorative:wght@700;900&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -19,17 +19,16 @@
 <div id="splash" class="splash">
   <button id="splash-mute" class="splash-mute" title="Toggle sound">🔇</button>
   <img class="asset-logo splash-logo-img" alt="RESPA Studio logo">
-  <div class="splash-logo">RESPA<span>STUDIO</span></div>
-  <p class="splash-tag">✿ cute art for streamers ✿</p>
+  <p class="splash-tag">✦ a tiny fantasy atelier of cute art ✦</p>
   <button id="splash-enter" class="btn btn-big btn-pink">▶ Tap to enter</button>
+  <div class="splash-tap-hint">TAP TO ENTER</div>
 </div>
 
 <!-- LOADING -->
 <div id="loading" class="loading hidden">
   <img class="asset-logo loading-logo-img" alt="RESPA Studio logo">
-  <div class="loading-logo">RESPA<span>STUDIO</span></div>
   <div class="loading-track">
-    <div id="loading-walker" class="loading-walker">🐰</div>
+    <div id="loading-walker" class="loading-walker"></div>
     <div id="loading-bar" class="loading-bar"></div>
   </div>
   <div class="loading-text">LOADING...</div>
@@ -38,7 +37,7 @@
 <!-- HEADER (inner pages + town top bar) -->
 <header id="site-header" class="site-header hidden">
   <a href="#/" class="logo" id="logo-home"><img class="asset-logo logo-img" alt="RESPA Studio"></a>
-  <div class="day-banner">HOW'S YOUR DAY? ☀️</div>
+  <div class="day-banner">🎄 CHRISTMAS SALE — 20% OFF EVERYTHING · HOW'S YOUR DAY? ❄️</div>
   <nav class="pill-nav">
     <a href="#/commission" data-nav="commission">COMMISSION</a>
     <a href="#/gacha" data-nav="gacha">GACHA <span class="badge-new">New</span></a>
@@ -106,6 +105,19 @@
     <a href="#" >💬 Discord (placeholder)</a>
   </div>
 </div>
+
+<!-- PAGE TRANSITION (loading overlay, shown on every route change) -->
+<div id="page-transition" class="page-transition hidden">
+  <img class="asset-logo pt-logo" alt="RESPA Studio logo">
+  <div class="loading-track pt-track">
+    <div class="loading-walker pt-walker"></div>
+    <div class="pt-bar"></div>
+  </div>
+  <div class="loading-text">LOADING...</div>
+</div>
+
+<!-- SNOW (Christmas season) -->
+<canvas id="snow-canvas" class="snow-canvas"></canvas>
 
 <!-- SOUND TOGGLE -->
 <button id="sound-btn" class="sound-btn hidden" title="Toggle music">🔇</button>

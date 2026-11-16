@@ -40,7 +40,22 @@ const ASSETS = {
     shop: 'assets/img/building-shop.svg',
     soon: 'assets/img/building-comingsoon.svg',
   },
+  santa: 'assets/img/mascot-santa.svg',      // Christmas mascot (seasonal art)
+  sprites: {
+    walk: [1, 2, 3, 4, 5, 6, 7, 8].map(i => 'assets/img/sprites/walk-' + String(i).padStart(2, '0') + '.svg'),
+    fountain: [1, 2, 3, 4, 5, 6].map(i => 'assets/img/sprites/fountain-' + String(i).padStart(2, '0') + '.svg'),
+    water: [1, 2, 3, 4].map(i => 'assets/img/sprites/water-' + String(i).padStart(2, '0') + '.svg'),
+    trees: [1, 2, 3, 4, 5, 6].map(i => 'assets/img/sprites/tree-' + String(i).padStart(2, '0') + '.svg'),
+    xmas: {
+      tree: 'assets/img/sprites/xmas-tree.svg', snowman: 'assets/img/sprites/xmas-snowman.svg',
+      gifts: 'assets/img/sprites/xmas-gifts.svg', wreath: 'assets/img/sprites/xmas-wreath.svg',
+      lantern: 'assets/img/sprites/xmas-lantern.svg', sleigh: 'assets/img/sprites/xmas-sleigh.svg',
+    },
+  },
 };
+
+/* ---------- Seasonal sale (Christmas) ---------- */
+const SALE = { active: true, pct: 20, label: 'Christmas Sale', note: 'Prices shown include the discount. Shop pay-what-you-want minimum stays $2.50.' };
 
 const rng = mulberry32(20261116);
 const pick = (arr) => arr[Math.floor(rng() * arr.length)];
@@ -149,6 +164,7 @@ function makeVtuberItems(tab, count, prefix, priceMin, priceMax, soldOutEvery) {
     kind: 'vtuber', img: null, tab, id: prefix + '-' + (i + 1),
     name: pick(NAME_A) + ' ' + ['Model', 'Live2D', 'Chibi', 'Design'][i % 4] + ' #' + (i + 1),
     emoji: emojis[i % emojis.length], hue: (i * 53 + 20) % 360,
+    priceMin: priceMin + i * 15, priceMax: priceMax + i * 15,
     priceLabel: '$' + (priceMin + i * 15) + ' – $' + (priceMax + i * 15),
     soldOut: soldOutEvery ? (i % soldOutEvery === 1) : false,
   }));
@@ -248,7 +264,7 @@ VTUBER_ITEMS.forEach((it, i) => {
 });
 
 window.DATA = {
-  ASSETS,
+  ASSETS, SALE,
   COMMISSION_CATEGORIES, COMMISSION_ITEMS, REVIEWS, PRICING_TIERS,
   STREAMKIT_SUBTABS, STREAMKIT_ITEMS, VTUBER_TABS, VTUBER_ITEMS,
   SHOP_CATEGORIES, SHOP_ITEMS, GACHA_REWARDS, GACHA_RARITY_WEIGHTS, GACHA_FAQ,

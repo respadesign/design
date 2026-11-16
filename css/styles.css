@@ -346,3 +346,78 @@ details.acc p{margin-top:8px;color:var(--ink2);font-weight:700;line-height:1.55}
 .vt-card .arch{overflow:hidden}
 .vt-card .arch img.art-img{width:100%;height:100%;object-fit:contain;display:block}
 .modal-art img.art-img[src*="vtuber"]{object-fit:contain}
+
+/* ============================================================
+   v2 — Fantasy reskin · animated town · transitions · sale
+   ============================================================ */
+:root{
+  --yellow:#f6bd2f; --yellow2:#ffd968; --yellow-soft:#f8edd6;
+  --black:#241831; --ink:#2e2138; --ink2:#77688a;
+  --pink:#ff6fa5; --pink-dark:#d63384;
+}
+body{background:var(--yellow-soft)}
+h1,h2{font-family:'Cinzel Decorative','Baloo 2',serif;letter-spacing:.5px}
+.sec-head h1{font-size:clamp(30px,4.5vw,42px)}
+.site-header{background:linear-gradient(180deg,#2e1f45,#241831);border-bottom:3px solid var(--yellow)}
+
+/* splash & loading */
+.splash{background:radial-gradient(1100px 640px at 50% 28%,#3d2660,#17102b 72%)}
+.splash-logo-img{width:min(360px,72vw)}
+.splash-tap-hint{color:#a79cc4;letter-spacing:7px;font-weight:800;font-size:13px}
+.loading{background:#fdf6e3}
+.loading-logo-img{width:min(240px,56vw)}
+.loading-walker{top:-58px}
+.loading-walker img{height:54px;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.2))}
+
+/* page transition overlay */
+.page-transition{position:fixed;inset:0;background:#fdf6e3;z-index:298;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:22px;opacity:0;pointer-events:none;transition:opacity .22s ease}
+.page-transition.show{opacity:1;pointer-events:all}
+.pt-logo{width:min(210px,50vw);height:auto}
+.page-transition.show .pt-bar{animation:ptfill .45s ease forwards}
+.page-transition.show .pt-walker{animation:ptmove .45s ease forwards}
+.pt-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--pink),#ffb03a);border-radius:999px}
+.pt-walker{position:absolute;top:-58px;left:0}
+.pt-walker img{height:54px;display:block}
+@keyframes ptfill{from{width:0%}to{width:100%}}
+@keyframes ptmove{from{left:0}to{left:calc(100% - 40px)}}
+
+/* snow */
+.snow-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:260}
+
+/* sale */
+.price-was{color:var(--ink2);text-decoration:line-through;font-weight:700;font-size:.86em}
+.sale-badge{display:inline-block;background:#c62828;color:#fff;font-family:var(--font-head);font-weight:800;
+  font-size:11px;padding:2px 8px;border-radius:999px;vertical-align:middle;box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.sale-strip{display:flex;gap:18px;align-items:center;background:linear-gradient(135deg,#6d1a1a,#a52a2a 60%,#7c2128);
+  color:#fff;border-radius:20px;padding:14px 22px;margin-bottom:22px;box-shadow:var(--shadow);border:3px solid #ffd968}
+.sale-strip img{height:98px;width:auto;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3))}
+.sale-strip b{font-family:var(--font-head);font-size:clamp(17px,2.6vw,23px);display:block;margin-bottom:3px}
+.sale-strip span{font-weight:700;opacity:.94;font-size:14px}
+.sale-strip-badge{margin-left:auto;background:var(--yellow);color:#5d1010;font-family:var(--font-head);
+  font-weight:800;font-size:24px;padding:8px 16px;border-radius:14px;transform:rotate(3deg);white-space:nowrap}
+@media (max-width:640px){.sale-strip{flex-wrap:wrap}.sale-strip-badge{margin-left:0}}
+
+/* town v2 */
+.town-viewport{background:#0d3038}
+.town-scene{background-color:#79b657}
+.building .b-img{width:auto;height:252px}
+.building:hover .bubble{opacity:1;transform:translateX(-50%) translateY(0)}
+.building{z-index:5}
+.tree-sprite{position:absolute;z-index:2;transform-origin:50% 100%;filter:drop-shadow(0 6px 5px rgba(0,0,0,.18));pointer-events:none}
+.sway{animation:sway 3.6s ease-in-out infinite}
+.fountain-sprite{position:absolute;left:782px;top:390px;width:348px;z-index:3;pointer-events:none;filter:drop-shadow(0 10px 10px rgba(0,0,0,.2))}
+.pond{position:absolute;left:412px;top:1058px;width:334px;height:98px;border-radius:50%;overflow:hidden;z-index:2;
+  box-shadow:inset 0 0 0 7px rgba(122,90,58,.55), inset 0 0 26px rgba(10,60,90,.5), 0 6px 14px rgba(0,0,0,.25)}
+.pond img{width:100%;height:100%;object-fit:cover;display:block}
+.walker{position:absolute;left:0;top:778px;height:132px;z-index:6;pointer-events:none;will-change:transform;
+  filter:drop-shadow(0 8px 6px rgba(0,0,0,.25))}
+.xmas-sprite{position:absolute;z-index:3;pointer-events:none;filter:drop-shadow(0 6px 6px rgba(0,0,0,.22))}
+.cloud{position:absolute;width:280px;height:78px;border-radius:999px;opacity:.75;pointer-events:none;z-index:1;
+  background:radial-gradient(ellipse 90px 34px at 60px 48px,#fff 98%,transparent),radial-gradient(ellipse 120px 44px at 150px 40px,#fff 98%,transparent),radial-gradient(ellipse 80px 30px at 225px 50px,#fff 98%,transparent)}
+.cloud-a{top:56px;animation:drift 115s linear infinite}
+.cloud-b{top:168px;transform:scale(.65);animation:drift 155s linear infinite;animation-delay:-60s}
+@keyframes drift{from{transform:translateX(-340px)}to{transform:translateX(1980px)}}
+.cloud-b{animation-name:driftb}
+@keyframes driftb{from{transform:translateX(-340px) scale(.65)}to{transform:translateX(1980px) scale(.65)}}
+.town-sign{left:838px;top:985px;background:#2e1f45;color:#ffd968;border-color:#ffd968;font-family:'Cinzel Decorative',serif}
