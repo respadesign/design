@@ -208,21 +208,25 @@ const TownAnim = {
   start(walker, fountain, water) {
     this.stop(); this.running = true;
     [...A.sprites.walk, ...A.sprites.fountain, ...A.sprites.water].forEach(src => { const im = new Image(); im.src = src; });
-    let x = 320, dir = 1, dist = 0, last = performance.now(), fAcc = 0, wAcc = 0;
-    const SPEED = 58; // world px per second
+    // Wall-clock timing: frames are a pure function of elapsed time, so a
+    // throttled/backgrounded tab can never make the animation run slow —
+    // whenever a frame is painted it shows the correct frame for that moment.
+    const t0 = performance.now();
+    const X0 = 250, X1 = 1620, SPAN = X1 - X0, SPEED = 58; // world px per second
     const tick = (now) => {
       if (!this.running) return;
-      const dt = Math.min(0.05, (now - last) / 1000); last = now;
-      x += dir * SPEED * dt; dist += SPEED * dt;
-      if (x > 1620) { x = 1620; dir = -1; }
-      if (x < 250) { x = 250; dir = 1; }
+      const t = (now - t0) / 1000;
+      const dist = t * SPEED;
+      const m = dist % (2 * SPAN);
+      const dir = m <= SPAN ? 1 : -1;
+      const x = dir === 1 ? X0 + m : X1 - (m - SPAN);
       walker.style.transform = `translateX(${x}px) scaleX(${dir})`;
       const wf = Math.floor(dist / 17) % 8;
       if (walker.dataset.f != wf) { walker.dataset.f = wf; walker.src = A.sprites.walk[wf]; }
-      fAcc += dt;
-      if (fAcc > 0.13) { fAcc = 0; const nf = ((+fountain.dataset.f || 0) + 1) % 6; fountain.dataset.f = nf; fountain.src = A.sprites.fountain[nf]; }
-      wAcc += dt;
-      if (wAcc > 0.26) { wAcc = 0; const nw = ((+water.dataset.f || 0) + 1) % 4; water.dataset.f = nw; water.src = A.sprites.water[nw]; }
+      const nf = Math.floor(t / 0.13) % 6;
+      if (fountain.dataset.f != nf) { fountain.dataset.f = nf; fountain.src = A.sprites.fountain[nf]; }
+      const nw = Math.floor(t / 0.26) % 4;
+      if (water.dataset.f != nw) { water.dataset.f = nw; water.src = A.sprites.water[nw]; }
       this.raf = requestAnimationFrame(tick);
     };
     this.raf = requestAnimationFrame(tick);
@@ -279,13 +283,18 @@ function renderHome() {
   /* --- drag with pointer capture (the old once-only pointerup got stuck) --- */
   let drag = null, movedPx = 0, suppressClick = false;
   vp.addEventListener('pointerdown', e => {
-    drag = { px: e.clientX, py: e.clientY, ox: town.x, oy: town.y }; movedPx = 0;
-    try { vp.setPointerCapture(e.pointerId); } catch (err) { /* older browser */ }
+    drag = { px: e.clientX, py: e.clientY, ox: town.x, oy: town.y, captured: false }; movedPx = 0;
+    // NOTE: no pointer capture here — capturing on pointerdown retargets the
+    // click event to the viewport and building buttons would never be clicked.
+    // Capture starts lazily in pointermove, once a real drag is under way.
   });
   vp.addEventListener('pointermove', e => {
     if (!drag) return;
     const dx = e.clientX - drag.px, dy = e.clientY - drag.py;
     movedPx = Math.max(movedPx, Math.abs(dx) + Math.abs(dy));
+    if (movedPx > 7 && !drag.captured) {
+      try { vp.setPointerCapture(e.pointerId); drag.captured = true; } catch (err) { /* older browser */ }
+    }
     town.x = drag.ox + dx; town.y = drag.oy + dy; clampApply();
   });
   const endDrag = () => { if (drag && movedPx > 7) { suppressClick = true; setTimeout(() => { suppressClick = false; }, 60); } drag = null; };
