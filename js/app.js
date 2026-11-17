@@ -361,7 +361,7 @@ function renderHome() {
     clampApply();
   };
   fit(true);
-  addEventListener('resize', () => { if (document.getElementById('town-vp')) fit(false); });
+  addEventListener('resize', () => { if (document.getElementById('town-vp')) fit(true); });
   /* --- drag with pointer capture (the old once-only pointerup got stuck) --- */
   let drag = null, movedPx = 0, lastDown = null;
   vp.addEventListener('pointerdown', e => {
@@ -383,15 +383,7 @@ function renderHome() {
   const endDrag = () => { drag = null; };
   vp.addEventListener('pointerup', endDrag);
   vp.addEventListener('pointercancel', endDrag);
-  vp.addEventListener('wheel', e => {
-    e.preventDefault();
-    const rect = vp.getBoundingClientRect();
-    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-    const wx = (mx - town.x) / town.scale, wy = (my - town.y) / town.scale;
-    town.scale = Math.max(town.base * 0.85, Math.min(town.base * 2.4, town.scale * (e.deltaY < 0 ? 1.09 : 0.92)));
-    town.userZoom = true;
-    town.x = mx - wx * town.scale; town.y = my - wy * town.scale; clampApply();
-  }, { passive: false });
+  /* Zoom is intentionally disabled — the town is drag-only (Smith's call). */
   let coarse = false;
   try { coarse = matchMedia('(hover: none)').matches; } catch (e) { /* very old browser: assume mouse */ }
   $$('.building', vp).forEach(btn => btn.addEventListener('click', e => {

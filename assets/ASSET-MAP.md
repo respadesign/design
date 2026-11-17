@@ -46,3 +46,8 @@ assets/img/chat-head.svg        300×300  — mascot head/bust inside the Chat M
 ## v4 notes
 assets/img/logo.svg — ANIMATED logo (SMIL flipbook, 17 frames sampled from Smith's own logo GIF, 1.98s loop). To replace: rebuild from the GIF frames, or drop a static SVG here to go back to a still logo.
 assets/img/building-*.svg — hand-drawn VECTOR cartoon buildings (drawn in code, ~2 KB each). Edit the SVG shapes directly to restyle.
+
+## v5 notes
+assets/img/building-*.svg — isometric soft-3D-cartoon buildings, AI-generated one by one in the reference's art style but with ORIGINAL shapes (pencil-tower atelier, capsule-ball gacha pavilion, shopping-bag shop, moon observatory, TV stream hall, treehouse, construction site). Regenerate or replace per file; keep the same filenames.
+assets/img/sprites/tree-*.svg + fountain-*.svg — same style pass (trees sliced from one sheet; fountain is a 6-frame loop sliced from one sheet, frames share geometry — do not trim individually).
+Map interaction: drag-only (zoom disabled on purpose), full screen.
