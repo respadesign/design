@@ -37,3 +37,8 @@ Frame sequences driven by one animation loop on the town page — replace frame-
 - tree-01..06.svg — fantasy trees (sway via CSS)
 - xmas-*.svg — Christmas decor: tree, snowman, gifts, wreath, lantern, sleigh
 - ../mascot-santa.svg — Christmas mascot used in the sale banners
+
+## Gacha & chat (v3)
+assets/img/gacha-machine.svg    ~560 tall — the big capsule machine on the gacha page
+assets/img/mascot-present.svg   ~560 tall — RESPA presenting (one arm out, holding a capsule) — gacha page + begin gate
+assets/img/chat-head.svg        300×300  — mascot head/bust inside the Chat Me badge + chat panel header

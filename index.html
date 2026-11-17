@@ -11,7 +11,7 @@
 <meta property="og:image" content="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Cinzel+Decorative:wght@700;900&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=5">
+<link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body>
 
@@ -92,9 +92,12 @@
 </footer>
 
 <!-- CHAT WIDGET -->
-<button id="chat-btn" class="chat-btn">💬 Chat Me</button>
+<button id="chat-btn" class="chat-btn" aria-label="Chat Me">
+  <span class="chat-bubble-tag">CHAT ME</span>
+  <span class="chat-badge"><img class="asset-chat-head" alt="RESPA mascot"></span>
+</button>
 <div id="chat-panel" class="chat-panel hidden">
-  <div class="chat-head">RESPA Studio ✿ <button id="chat-close">✕</button></div>
+  <div class="chat-head"><span><img class="asset-chat-head chat-head-img" alt="">RESPA Studio ✿</span> <button id="chat-close">✕</button></div>
   <div id="chat-log" class="chat-log"></div>
   <form id="chat-form" class="chat-form">
     <input id="chat-input" type="text" placeholder="Type a message…" autocomplete="off">
@@ -126,8 +129,8 @@
 <div id="modal-root"></div>
 <div id="toast-root" class="toast-root"></div>
 
-<script src="js/data.js?v=5"></script>
-<script src="js/state.js?v=5"></script>
-<script src="js/app.js?v=5"></script>
+<script src="js/data.js?v=6"></script>
+<script src="js/state.js?v=6"></script>
+<script src="js/app.js?v=6"></script>
 </body>
 </html>

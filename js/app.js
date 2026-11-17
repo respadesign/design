@@ -23,6 +23,7 @@ function thumbStyle(item) { return item && item.img ? '' : artStyle(item.hue); }
 /* Apply config-driven asset slots that live in the static shell (logos, OG image) */
 function applyShellAssets() {
   $$('.asset-logo').forEach(img => { img.src = A.logo; });
+  $$('.asset-chat-head').forEach(img => { img.src = A.chatHead; });
   const og = document.querySelector('meta[property="og:image"]');
   if (og) og.setAttribute('content', A.hero);
 }
@@ -43,6 +44,7 @@ function openModal(html, wide) {
     <button class="modal-close" id="modal-close">✕</button>${html}</div></div>`;
   $('.modal-back', root).addEventListener('click', e => { if (e.target.classList.contains('modal-back')) closeModal(); });
   $('#modal-close', root).onclick = closeModal;
+  $$('#modal-root [js-close-modal]').forEach(el => el.addEventListener('click', closeModal));
 }
 function closeModal() { document.getElementById('modal-root').innerHTML = ''; }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
@@ -384,7 +386,7 @@ function openCommissionDetail(id) {
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-pink" id="d-checkout">Checkout Now</button>
       <button class="btn btn-yellow" id="d-add">Add to cart</button>
-      <a class="btn btn-white" href="#/how-to-order" onclick="closeModal()">Not sure how to order?</a>
+      <a class="btn btn-white" href="#/how-to-order" js-close-modal>Not sure how to order?</a>
     </div>`);
   $('#d-fav').onclick = () => { Store.toggleFav(it.id); openCommissionDetail(it.id); route(); };
   const asCart = () => ({ key: 'comm-' + it.id, kind: 'commission', refId: it.id, name: it.name + ' (' + it.code + ')', price: salePrice(it.price), emoji: it.emoji, hue: it.hue, img: it.img });
@@ -581,7 +583,7 @@ function renderVtubers() {
       <ul style="margin:12px 0 12px 20px;font-weight:700;color:var(--ink2);line-height:1.7">
         <li>Live2D model art (.psd, separated layers)</li><li>Rigging included — ready for VTube Studio</li>
         <li>3 expressions + 2 toggles included</li><li>Commercial streaming use included</li><li>Delivery in ±3–5 weeks</li></ul>
-      <a class="btn btn-pink" href="#/commission/custom" onclick="closeModal()">Order this model → Custom form</a>`);
+      <a class="btn btn-pink" href="#/commission/custom" js-close-modal>Order this model → Custom form</a>`);
   });
 }
 
@@ -713,17 +715,27 @@ function renderGacha() {
     </div>
     <div class="gacha-stage" id="gacha-stage">
       ${!gachaStarted ? `
-        <div class="panel" style="max-width:520px;margin:20px auto;cursor:pointer" id="gacha-begin">
-          <div style="font-size:80px">🎰</div>
+        <div class="panel gacha-begin-panel" id="gacha-begin">
+          <div class="gacha-begin-imgs"><img class="gb-mascot" src="${esc(A.mascotPresent)}" alt="RESPA mascot"><img class="gb-machine" src="${esc(A.gachaMachine)}" alt="Gacha capsule machine"></div>
           <h2 style="font-size:30px;margin:8px 0">Press any key to begin</h2>
           <p style="font-weight:700;color:var(--ink2)">…or click here. Your starting balance: <b>2,000 coins</b> 🪙</p>
         </div>` : `
-        <div style="margin-bottom:14px"><span class="coin-pill">🪙 <span id="g-balance">${g.balance.toLocaleString()}</span> coins</span>
-          <span class="coin-pill" style="background:#fff;color:var(--ink);border:3px solid var(--black);margin-left:8px">📦 Collection ${owned}/20</span></div>
-        <div class="gacha-machine" id="gacha-machine">
-          <div class="gacha-globe">🧸</div>
-          <h2 style="margin-top:12px;font-size:26px">RESPA CAPSULE</h2>
-          <p style="font-weight:700">1 pull = 100 · 5 pulls = 450 coins</p>
+        <div class="gacha-room">
+          <div class="gacha-mascot">
+            <img src="${esc(A.mascotPresent)}" alt="RESPA mascot presenting the gacha machine">
+            <div class="gacha-speech" id="gacha-speech">Pick a pull and try your luck! ✨</div>
+          </div>
+          <div class="gacha-center">
+            <div style="margin-bottom:10px"><span class="coin-pill">🪙 <span id="g-balance">${g.balance.toLocaleString()}</span> coins</span>
+              <span class="coin-pill" style="background:#fff;color:var(--ink);border:3px solid var(--black);margin-left:8px">📦 Collection ${owned}/20</span></div>
+            <div class="gacha-machine2" id="gacha-machine"><img src="${esc(A.gachaMachine)}" alt="RESPA capsule machine"></div>
+            <p style="font-weight:700;margin-top:4px">1 pull = 100 · 5 pulls = 450 coins</p>
+          </div>
+          <div class="gacha-prizes">
+            <h3>🎁 Prize Panel</h3>
+            <div class="prize-grid">${D.GACHA_REWARDS.map(r => { const has = !!g.collection[r.id]; return `<div class="prize-tile rarity-${r.rarity} ${has ? '' : 'locked'}" title="${has ? esc(r.name) + ' — ' + r.rarity : '??? — ' + r.rarity}">${has ? artInner(r, '') : '❔'}<span class="rar-dot"></span></div>`; }).join('')}</div>
+            <p class="sold-note" style="margin-top:10px">Collect all 20 original designs!</p>
+          </div>
         </div>
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:18px 0">
           <button class="btn btn-pink" id="pull-1" ${gachaAnimating ? 'disabled' : ''}>🎁 1x PULL · 100</button>
@@ -777,11 +789,13 @@ function doPull(n) {
   Store.setBalance(g.balance - cost);
   pendingRewards = Array.from({ length: n }, rollReward);
   gachaAnimating = true; renderGacha();
+  { const sp = $('#gacha-speech'); if (sp) sp.textContent = 'Here it comes…! 🎁'; }
   const machine = $('#gacha-machine'); if (machine) machine.classList.add('shaking');
   const skip = $('#pull-skip'); if (skip) skip.classList.remove('hidden');
   gachaTimer = setTimeout(revealRewards, 1200);
 }
 function revealRewards() {
+  { const sp = $('#gacha-speech'); if (sp) sp.textContent = 'You got something! Collect it below ♡'; }
   if (!pendingRewards) return;
   if (gachaTimer) clearTimeout(gachaTimer);
   gachaAnimating = false;
@@ -802,7 +816,7 @@ function revealRewards() {
         <h3 style="font-size:15px">${esc(r.name)}</h3><div class="rarity-label">${r.rarity}</div>
         <div class="sold-note">${isNew ? '✨ NEW!' : 'Duplicate → +20 🪙'}</div></div>`).join('')}
     </div>
-    <div style="text-align:center;margin-top:16px"><button class="btn btn-pink" onclick="closeModal()">Collect ♡</button></div>`);
+    <div style="text-align:center;margin-top:16px"><button class="btn btn-pink" js-close-modal>Collect ♡</button></div>`);
   renderGacha();
 }
 

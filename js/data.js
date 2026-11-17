@@ -40,7 +40,10 @@ const ASSETS = {
     shop: 'assets/img/building-shop.svg',
     soon: 'assets/img/building-comingsoon.svg',
   },
-  santa: 'assets/img/mascot-santa.svg',      // Christmas mascot (seasonal art)
+  santa: 'assets/img/mascot-santa.svg',
+  gachaMachine: 'assets/img/gacha-machine.svg',
+  mascotPresent: 'assets/img/mascot-present.svg',
+  chatHead: 'assets/img/chat-head.svg',      // Christmas mascot (seasonal art)
   sprites: {
     walk: [1, 2, 3, 4, 5, 6, 7, 8].map(i => 'assets/img/sprites/walk-' + String(i).padStart(2, '0') + '.svg'),
     fountain: [1, 2, 3, 4, 5, 6].map(i => 'assets/img/sprites/fountain-' + String(i).padStart(2, '0') + '.svg'),
