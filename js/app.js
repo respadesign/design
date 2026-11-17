@@ -252,7 +252,8 @@ const TownAnim = {
   raf: 0, running: false, walking: false,
   pos: { x: 250, y: 852 }, dir: 1, dist: 0, vel: 0,
   mode: 'stroll', path: null, pathDist: 0, pathLen: 0, onArrive: null,
-  stop() { this.running = false; this.walking = false; this.mode = 'stroll'; this.path = null; this.vel = 0; if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0; },
+  parts: [], pLayer: null, acc: { bub: 0, pond: 0, spark: 0 }, sparkIdx: 0,
+  stop() { this.running = false; this.walking = false; this.mode = 'stroll'; this.path = null; this.vel = 0; if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0; if (this.pLayer) { this.pLayer.remove(); this.pLayer = null; } this.parts = []; },
   walkTo(points, speed, onArrive) {
     this.path = points; this.pathDist = 0; this.vel = 0; this.gotoSpeed = speed; this.onArrive = onArrive; this.mode = 'goto'; this.walking = true;
     this.pathLen = 0;
@@ -270,8 +271,41 @@ const TownAnim = {
     const last = pts[pts.length - 1], prevP = pts[pts.length - 2] || last;
     return { x: last.x, y: last.y, dx: last.x - prevP.x };
   },
+  spawnParticle(kind, x, y) {
+    if (!this.pLayer || this.parts.length >= 26) return;
+    const el = document.createElement('div');
+    if (kind === 'spark') { el.className = 'town-particle spark'; el.textContent = '✦'; }
+    else el.className = 'town-particle bub';
+    this.pLayer.appendChild(el);
+    this.parts.push({ el, kind, x, y, age: 0, life: kind === 'spark' ? 1.25 : 1.7 + Math.random() * 1.1, size: kind === 'spark' ? 15 + Math.random() * 9 : 7 + Math.random() * 13, vy: kind === 'spark' ? 0 : 26 + Math.random() * 20, ph: Math.random() * 6.28 });
+  },
+  updateParticles(dt, t) {
+    this.acc.bub += dt; this.acc.pond += dt; this.acc.spark += dt;
+    if (this.acc.bub > 0.34) { this.acc.bub = 0; this.spawnParticle('bub', 954 + (Math.random() - 0.5) * 150, 585 + Math.random() * 30); }
+    if (this.acc.pond > 0.6) { this.acc.pond = 0; this.spawnParticle('bub', 579 + (Math.random() - 0.5) * 190, 1085 + Math.random() * 40); }
+    if (this.acc.spark > 0.85) { this.acc.spark = 0; const spots = [[434, 640], [1534, 640], [419, 300], [1284, 330], [1604, 430], [1314, 990], [304, 1060]]; const sp = spots[this.sparkIdx++ % spots.length]; this.spawnParticle('spark', sp[0] + (Math.random() - 0.5) * 60, sp[1] + (Math.random() - 0.5) * 40); }
+    for (let i = this.parts.length - 1; i >= 0; i--) {
+      const P = this.parts[i]; P.age += dt;
+      if (P.age >= P.life) { P.el.remove(); this.parts.splice(i, 1); continue; }
+      const k = P.age / P.life;
+      const fade = k < 0.18 ? k / 0.18 : 1 - Math.max(0, (k - 0.62) / 0.38);
+      if (P.kind === 'bub') {
+        P.y -= P.vy * dt; const wob = Math.sin(P.age * 5 + P.ph) * 7;
+        const sc = 0.7 + k * 0.6;
+        P.el.style.width = P.el.style.height = P.size + 'px';
+        P.el.style.transform = `translate(${P.x + wob - P.size / 2}px, ${P.y - P.size / 2}px) scale(${sc})`;
+      } else {
+        const sc = Math.sin(Math.PI * Math.min(1, k));
+        P.el.style.fontSize = P.size + 'px';
+        P.el.style.transform = `translate(${P.x}px, ${P.y}px) scale(${sc}) rotate(${k * 70}deg)`;
+      }
+      P.el.style.opacity = Math.max(0, Math.min(1, fade)).toFixed(2);
+    }
+  },
   start(walker, fountain, water) {
     this.stop(); this.running = true;
+    this.pLayer = document.createElement('div'); this.pLayer.className = 'town-particles';
+    if (walker.parentNode) walker.parentNode.appendChild(this.pLayer);
     [...A.sprites.walk, ...A.sprites.fountain, ...A.sprites.water].forEach(src => { const im = new Image(); im.src = src; });
     const t0 = performance.now(); let last = t0;
     const tick = (now) => {
@@ -309,6 +343,7 @@ const TownAnim = {
       if (fountain.dataset.f != nf) { fountain.dataset.f = nf; fountain.src = A.sprites.fountain[nf]; }
       const nw = Math.floor(t / 0.26) % 4;
       if (water.dataset.f != nw) { water.dataset.f = nw; water.src = A.sprites.water[nw]; }
+      this.updateParticles(dt, t);
       this.raf = requestAnimationFrame(tick);
     };
     this.raf = requestAnimationFrame(tick);
@@ -1267,6 +1302,7 @@ const Snow = {
         if (f.y > cv.height + 4) { f.y = -4; f.x = Math.random() * cv.width; }
         cx.beginPath(); cx.arc(f.x, f.y, f.r, 0, 6.29); cx.fill();
       }
+      this.updateParticles(dt, t);
       this.raf = requestAnimationFrame(tick);
     };
     tick();

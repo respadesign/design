@@ -491,3 +491,9 @@ h1,h2{font-family:'Cinzel Decorative','Baloo 2',serif;letter-spacing:.5px}
 .building .b-img{filter:drop-shadow(0 10px 9px rgba(46,84,26,.28))}
 .town-viewport{cursor:grab}
 .town-viewport:active{cursor:grabbing}
+
+/* v6 — ambient town particles (bubbles at the water, sparkles at doors) */
+.town-particles{position:absolute;inset:0;pointer-events:none;z-index:6;overflow:visible}
+.town-particle{position:absolute;left:0;top:0;pointer-events:none;border-radius:50%;will-change:transform,opacity}
+.town-particle.bub{background:radial-gradient(circle at 32% 30%,rgba(255,255,255,.95),rgba(255,255,255,.28) 58%,rgba(255,255,255,.06));border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 7px rgba(255,255,255,.45)}
+.town-particle.spark{border-radius:0;background:none;color:#ffe98a;line-height:1;text-shadow:0 0 9px rgba(255,220,120,.95)}

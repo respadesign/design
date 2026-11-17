@@ -51,3 +51,7 @@ assets/img/building-*.svg — hand-drawn VECTOR cartoon buildings (drawn in code
 assets/img/building-*.svg — isometric soft-3D-cartoon buildings, AI-generated one by one in the reference's art style but with ORIGINAL shapes (pencil-tower atelier, capsule-ball gacha pavilion, shopping-bag shop, moon observatory, TV stream hall, treehouse, construction site). Regenerate or replace per file; keep the same filenames.
 assets/img/sprites/tree-*.svg + fountain-*.svg — same style pass (trees sliced from one sheet; fountain is a 6-frame loop sliced from one sheet, frames share geometry — do not trim individually).
 Map interaction: drag-only (zoom disabled on purpose), full screen.
+
+## v6 notes
+Buildings/trees/fountain regenerated in FLAT vector isometric style (the reference's actual art style — flat colours, soft cel shading, matte) with the same original shapes as v5; the glossy 3D versions were superseded the same day at Smith's direction.
+Town ambience: code-drawn bubble particles rise at the fountain and pond, and small sparkles twinkle at building doors (TownAnim.updateParticles) — an original implementation of the floating-bubble effect Smith referenced via webm; no external asset files.
