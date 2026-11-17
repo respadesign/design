@@ -42,3 +42,7 @@ Frame sequences driven by one animation loop on the town page — replace frame-
 assets/img/gacha-machine.svg    ~560 tall — the big capsule machine on the gacha page
 assets/img/mascot-present.svg   ~560 tall — RESPA presenting (one arm out, holding a capsule) — gacha page + begin gate
 assets/img/chat-head.svg        300×300  — mascot head/bust inside the Chat Me badge + chat panel header
+
+## v4 notes
+assets/img/logo.svg — ANIMATED logo (SMIL flipbook, 17 frames sampled from Smith's own logo GIF, 1.98s loop). To replace: rebuild from the GIF frames, or drop a static SVG here to go back to a still logo.
+assets/img/building-*.svg — hand-drawn VECTOR cartoon buildings (drawn in code, ~2 KB each). Edit the SVG shapes directly to restyle.

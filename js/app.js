@@ -204,26 +204,106 @@ const BUILDINGS = [
 /* One rAF loop drives every town animation (walker, fountain, water).
    route() calls TownAnim.stop() on every navigation, so nothing leaks
    or stacks when the visitor leaves and returns to the map. */
+/* Road network drawn on the town map — the walker follows these paths,
+   never the grass. Door nodes sit at each building's doorstep. */
+const TOWN_NODES = {
+  roadW: [150, 852], soonTop: [304, 880], doorEmote: [434, 852], plazaS: [954, 852],
+  shopTop: [1252, 880], doorStream: [1534, 852], roadE: [1750, 852],
+  plazaSW: [830, 780], plazaW: [788, 644], plazaNW: [852, 522],
+  diagUL: [660, 425], diagULEnd: [472, 332], doorAbout: [419, 402],
+  plazaSE: [1090, 780], plazaE: [1120, 644], plazaNE: [1058, 522],
+  diagUR: [1195, 425], doorGacha: [1284, 417], diagUREnd: [1332, 332],
+  vtMid: [1470, 430], doorVtuber: [1604, 530],
+  shopDiag: [1092, 758], shopMid: [1300, 1000], doorShop: [1314, 1090],
+  doorSoon: [304, 1160],
+};
+const TOWN_EDGES = [
+  ['roadW', 'soonTop'], ['soonTop', 'doorEmote'], ['doorEmote', 'plazaS'], ['plazaS', 'shopTop'],
+  ['shopTop', 'doorStream'], ['doorStream', 'roadE'],
+  ['plazaS', 'plazaSW'], ['plazaSW', 'plazaW'], ['plazaW', 'plazaNW'],
+  ['plazaNW', 'diagUL'], ['diagUL', 'diagULEnd'], ['diagULEnd', 'doorAbout'],
+  ['plazaS', 'plazaSE'], ['plazaSE', 'plazaE'], ['plazaE', 'plazaNE'],
+  ['plazaNE', 'diagUR'], ['diagUR', 'doorGacha'], ['diagUR', 'diagUREnd'],
+  ['diagUREnd', 'vtMid'], ['vtMid', 'doorVtuber'],
+  ['plazaE', 'shopDiag'], ['shopDiag', 'shopTop'], ['shopTop', 'shopMid'], ['shopMid', 'doorShop'],
+  ['soonTop', 'doorSoon'],
+];
+const DOOR_NODE = { emote: 'doorEmote', streamkit: 'doorStream', about: 'doorAbout', gacha: 'doorGacha', vtuber: 'doorVtuber', shop: 'doorShop', soon: 'doorSoon' };
+function townRoute(from, doorKey) {
+  const adj = {};
+  TOWN_EDGES.forEach(([a, b]) => { (adj[a] = adj[a] || []).push(b); (adj[b] = adj[b] || []).push(a); });
+  let start = null, best = 1e18;
+  for (const k in TOWN_NODES) { const [x, y] = TOWN_NODES[k]; const d = (x - from.x) ** 2 + (y - from.y) ** 2; if (d < best) { best = d; start = k; } }
+  const prev = { [start]: null }, q = [start];
+  while (q.length) { const n = q.shift(); if (n === doorKey) break; (adj[n] || []).forEach(m => { if (!(m in prev)) { prev[m] = n; q.push(m); } }); }
+  const keys = []; let cur = doorKey;
+  while (cur) { keys.unshift(cur); cur = prev[cur]; }
+  const pts = [{ x: from.x, y: from.y }];
+  keys.forEach(k => { const [x, y] = TOWN_NODES[k]; if (Math.hypot(x - pts[pts.length - 1].x, y - pts[pts.length - 1].y) > 4) pts.push({ x, y }); });
+  return pts;
+}
+
+/* One rAF loop drives every town animation (walker, fountain, water).
+   route() calls TownAnim.stop() on every navigation, so nothing leaks
+   or stacks when the visitor leaves and returns to the map. The walker
+   strolls the main road; on a building click it walks the road network
+   to that building's door (walkTo), then the page change happens. */
 const TownAnim = {
-  raf: 0, running: false,
-  stop() { this.running = false; if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0; },
+  raf: 0, running: false, walking: false,
+  pos: { x: 250, y: 852 }, dir: 1, dist: 0, vel: 0,
+  mode: 'stroll', path: null, pathDist: 0, pathLen: 0, onArrive: null,
+  stop() { this.running = false; this.walking = false; this.mode = 'stroll'; this.path = null; this.vel = 0; if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0; },
+  walkTo(points, speed, onArrive) {
+    this.path = points; this.pathDist = 0; this.vel = 0; this.gotoSpeed = speed; this.onArrive = onArrive; this.mode = 'goto'; this.walking = true;
+    this.pathLen = 0;
+    for (let i = 1; i < points.length; i++) this.pathLen += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+    if (this.pathLen < 1) { this.arrive(); }
+  },
+  arrive() { const cb = this.onArrive; this.onArrive = null; this.mode = 'stroll'; this.walking = false; if (cb) cb(); },
+  pointAt(d) {
+    const pts = this.path; let acc = 0;
+    for (let i = 1; i < pts.length; i++) {
+      const seg = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+      if (d <= acc + seg) { const k = seg ? (d - acc) / seg : 0; return { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * k, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * k, dx: pts[i].x - pts[i - 1].x }; }
+      acc += seg;
+    }
+    const last = pts[pts.length - 1], prevP = pts[pts.length - 2] || last;
+    return { x: last.x, y: last.y, dx: last.x - prevP.x };
+  },
   start(walker, fountain, water) {
     this.stop(); this.running = true;
     [...A.sprites.walk, ...A.sprites.fountain, ...A.sprites.water].forEach(src => { const im = new Image(); im.src = src; });
-    // Wall-clock timing: frames are a pure function of elapsed time, so a
-    // throttled/backgrounded tab can never make the animation run slow —
-    // whenever a frame is painted it shows the correct frame for that moment.
-    const t0 = performance.now();
-    const X0 = 250, X1 = 1620, SPAN = X1 - X0, SPEED = 58; // world px per second
+    const t0 = performance.now(); let last = t0;
     const tick = (now) => {
       if (!this.running) return;
       const t = (now - t0) / 1000;
-      const dist = t * SPEED;
-      const m = dist % (2 * SPAN);
-      const dir = m <= SPAN ? 1 : -1;
-      const x = dir === 1 ? X0 + m : X1 - (m - SPAN);
-      walker.style.transform = `translateX(${x}px) scaleX(${dir})`;
-      const wf = Math.floor(dist / 17) % 8;
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      // Velocity eases toward its target — soft starts, soft stops and
+      // gentle turnarounds instead of robotic constant-speed motion.
+      if (this.mode === 'goto' && this.path) {
+        const remaining = this.pathLen - this.pathDist;
+        let target = this.gotoSpeed * Math.min(1, Math.max(0.22, remaining / 130));
+        target *= Math.min(1, Math.max(0.25, this.pathDist / 90));
+        this.vel += (target - this.vel) * Math.min(1, dt * 4);
+        this.pathDist += this.vel * dt; this.dist += this.vel * dt;
+        if (this.pathDist >= this.pathLen || (remaining < 26 && this.vel < 26)) { const end = this.path[this.path.length - 1]; this.pos = { x: end.x, y: end.y }; this.arrive(); }
+        else { const p = this.pointAt(this.pathDist); this.pos = { x: p.x, y: p.y }; if (Math.abs(p.dx) > 2) this.dir = p.dx > 0 ? 1 : -1; }
+      } else {
+        const edge = Math.min(this.pos.x - 250, 1620 - this.pos.x);
+        const ease = edge < 70 ? 0.3 + 0.7 * Math.max(0, edge) / 70 : 1;
+        const target = this.dir * 58 * ease;
+        this.vel += (target - this.vel) * Math.min(1, dt * 3.2);
+        this.pos.y = 852; this.pos.x += this.vel * dt; this.dist += Math.abs(this.vel) * dt;
+        if (this.pos.x >= 1620) { this.pos.x = 1620; this.dir = -1; }
+        if (this.pos.x <= 250) { this.pos.x = 250; this.dir = 1; }
+      }
+      // Body language: a step-synced bob and a gentle sway, fading out as
+      // she slows down — this is what keeps the walk from looking stiff.
+      const amp = Math.min(1, Math.abs(this.vel) / 80);
+      const bob = Math.sin(this.dist * (Math.PI * 2 / 68)) * 2.3 * amp;
+      const sway = Math.sin(this.dist * (Math.PI * 2 / 136)) * 1.7 * amp;
+      walker.style.transform = `translate(${this.pos.x - 66}px, ${this.pos.y - 132 + bob}px) scaleX(${this.dir}) rotate(${sway}deg)`;
+      const wf = Math.floor(this.dist / 17) % 8;
       if (walker.dataset.f != wf) { walker.dataset.f = wf; walker.src = A.sprites.walk[wf]; }
       const nf = Math.floor(t / 0.13) % 6;
       if (fountain.dataset.f != nf) { fountain.dataset.f = nf; fountain.src = A.sprites.fountain[nf]; }
@@ -263,7 +343,7 @@ function renderHome() {
         <div class="town-sign">✦ Town of RESPA ✦</div>
       </div>
       <div class="rotate-hint"><span style="font-size:44px">📱↔️</span>Rotate your phone to landscape<br>for the best town view!</div>
-      <div class="town-hint">🖱️ Drag to explore · Click a building to enter · RESPA is out for a walk!</div>
+      <div class="town-hint">🖱️ Drag to explore · Click a building and RESPA will walk there!</div>
     </div>
   </div>`;
   const vp = $('#town-vp'), scene = $('#town-scene');
@@ -327,8 +407,18 @@ function renderHome() {
     }
     town.selected = b.id;
     Sound.sfx('select');
-    if (b.route) location.hash = b.route;
-    else toast('🚧 Coming soon — this spot is still being built!');
+    if (TownAnim.walking) return;
+    const hint = $('.town-hint', vp); const hintHome = hint ? hint.textContent : '';
+    if (hint) hint.textContent = `✦ RESPA is on her way to ${b.name}… ✦`;
+    const pts = townRoute(TownAnim.pos, DOOR_NODE[b.id]);
+    TownAnim.walkTo(pts, 300, () => {
+      if (b.route) { location.hash = b.route; }
+      else {
+        toast('🚧 Coming soon — this spot is still being built!');
+        if (hint) hint.textContent = hintHome;
+        TownAnim.walkTo(townRoute(TownAnim.pos, 'plazaS'), 300, null);
+      }
+    });
   }));
   TownAnim.start($('#town-walker'), $('#town-fountain'), $('#town-water'));
 }
@@ -1045,13 +1135,18 @@ function render404() {
 /* ============================================================
    ROUTER
    ============================================================ */
+let lastRouteHash = null, savedScrollY = 0;
+window.addEventListener('scroll', () => { savedScrollY = window.scrollY; }, { passive: true });
 function route() {
   TownAnim.stop();
   closeModal();
   const hash = location.hash || '#/';
   const parts = hash.replace(/^#\//, '').split('/');
   const head = parts[0] || '';
-  window.scrollTo({ top: 0 });
+  // Same-page re-renders (e.g. after adding to the cart) keep the visitor's
+  // scroll position; only real navigation goes back to the top.
+  const samePage = hash === lastRouteHash;
+  if (!samePage) window.scrollTo({ top: 0 });
   if (hash === '#/' || hash === '#' || hash === '') renderHome();
   else if (head === 'commission' && parts[1] === 'custom') renderCustom();
   else if (head === 'commission') renderCommission(parts[1] || 'static');
@@ -1071,6 +1166,8 @@ function route() {
   else if (head === 'how-to-order') renderHowToOrder();
   else render404();
   updateHeader();
+  if (samePage) window.scrollTo({ top: savedScrollY });
+  lastRouteHash = hash;
 }
 /* Page transitions: a short loading overlay (logo + progress bar +
    mascot) plays on every route change — the reference site's pattern. */

@@ -77,6 +77,14 @@
 <line x1="1058" y1="522" x2="1332" y2="332"/>
 <line x1="1092" y1="758" x2="1252" y2="898"/>
 </g>
+<g stroke="#eec25e" stroke-width="80" stroke-linecap="round" fill="none">
+<path d="M1332,332 L1470,430 L1604,530"/>
+<path d="M1252,898 L1300,1000 L1314,1090"/>
+<path d="M304,900 L304,1160"/>
+</g>
+<g stroke="#d9a83f" stroke-width="3" opacity="0.65" fill="none">
+<path d="M1332,332 L1470,430 L1604,530"/><path d="M1252,898 L1300,1000 L1314,1090"/><path d="M304,900 L304,1160"/>
+</g>
 <g stroke="#d9a83f" stroke-width="3" opacity="0.65">
 <line x1="852" y1="522" x2="472" y2="332"/><line x1="1058" y1="522" x2="1332" y2="332"/><line x1="1092" y1="758" x2="1252" y2="898"/>
 </g>
